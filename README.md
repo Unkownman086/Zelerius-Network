@@ -7,7 +7,7 @@ Welcome to the repository of zelerius. Here you will find source code, instructi
 Contents
 * Building on Linux 64-bit
 * Building on Mac OSX
-* Building on Windows
+* Building on Windowszelerius-network
 * Building on other platforms
 
 ## Building on Linux 64-bit
@@ -16,83 +16,83 @@ All commands below are adapted for Ubuntu, other distributions may need an other
 
 ### Building with standard options
 
-Create directory `bcndev` somewhere and go there:
+Create directory `zelerius-network` somewhere and go there:
 ```
-$> mkdir bcndev
-$> cd bcndev
+$> mkdir zelerius-network
+$> cd zelerius-network
 ```
 
 To go futher you have to have a number of packages and utilities. You need at least gcc 5.4.
 
 * `build-essential` package:
     ```
-    $bcndev> sudo apt-get install build-essential
+    $zelerius-network> sudo apt-get install build-essential
     ```
 
 * CMake (3.5 or newer):
     ```
-    $bcndev> sudo apt-get install cmake
-    $bcndev> cmake --version
+    $zelerius-network> sudo apt-get install cmake
+    $zelerius-network> cmake --version
     ```
     If version is too old, follow instructions on [the official site](https://cmake.org/download/).
 
 * Boost (1.62 or newer):
-    You need boost in `bcndev` folder. We do not configure to use boost installed by `apt-get`, because it is sometimes updated without your control by installing some unrelated packages. Also some users reported crashes after `find_package` finds headers from one version of boost and libraries from different version, or if installed boost uses dynamic linking.
+    You need boost in `zelerius-network` folder. We do not configure to use boost installed by `apt-get`, because it is sometimes updated without your control by installing some unrelated packages. Also some users reported crashes after `find_package` finds headers from one version of boost and libraries from different version, or if installed boost uses dynamic linking.
     ```
-    $bcndev> wget -c 'http://sourceforge.net/projects/boost/files/boost/1.67.0/boost_1_67_0.tar.bz2/download'
-    $bcndev> tar xf download
-    $bcndev> rm download
-    $bcndev> mv boost_1_67_0 boost
-    $bcndev> cd boost
-    $bcndev/boost> ./bootstrap.sh
-    $bcndev/boost> ./b2 link=static -j 8 --build-dir=build64 --stagedir=stage
+    $zelerius-network> wget -c 'http://sourceforge.net/projects/boost/files/boost/1.67.0/boost_1_67_0.tar.bz2/download'
+    $zelerius-network> tar xf download
+    $zelerius-network> rm download
+    $zelerius-network> mv boost_1_67_0 boost
+    $zelerius-network> cd boost
+    $zelerius-network/boost> ./bootstrap.sh
+    $zelerius-network/boost> ./b2 link=static -j 8 --build-dir=build64 --stagedir=stage
     cd ..
     ```
 
 * OpenSSL (1.1.1 or newer):
-    Install OpenSSL to `bcndev/openssl` folder. (In below commands use switch `linux-x86_64-clang` instead of `linux-x86_64` if using clang.)
+    Install OpenSSL to `zelerius-network/openssl` folder. (In below commands use switch `linux-x86_64-clang` instead of `linux-x86_64` if using clang.)
     ```
-    $bcndev> git clone https://github.com/openssl/openssl.git
-    $bcndev> cd openssl
-    $bcndev/openssl> ./Configure linux-x86_64 no-shared
-    $bcndev/openssl> time make -j4
-    $bcndev/openssl> cd ..
+    $zelerius-network> git clone https://github.com/openssl/openssl.git
+    $zelerius-network> cd openssl
+    $zelerius-network/openssl> ./Configure linux-x86_64 no-shared
+    $zelerius-network/openssl> time make -j4
+    $zelerius-network/openssl> cd ..
     ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$bcndev> git clone https://github.com/bcndev/zelerius.git
+$zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
 ```
 
-Put LMDB source code in `bcndev` folder (source files are referenced via relative paths, so you do not need to separately build it):
+Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$bcndev> git clone https://github.com/LMDB/lmdb.git
+$zelerius-network> git clone https://github.com/LMDB/lmdb.git
 ```
 
 Create build directory inside zelerius, go there and run CMake and Make:
 ```
-$bcndev> mkdir zelerius/build
-$bcndev> cd zelerius/build
-$bcndev/zelerius/build> cmake ..
-$bcndev/zelerius/build> time make -j4
+$zelerius-network> mkdir zelerius/build
+$zelerius-network> cd zelerius/build
+$zelerius-network/zelerius/build> cmake ..
+$zelerius-network/zelerius/build> time make -j4
 ```
 
 Check built binaries by running them from `../bin` folder
 ```
-$bcndev/zelerius/build> ../bin/zeleriusd -v
+$zelerius-network/zelerius/build> ../bin/zeleriusd -v
 ```
 
 ### Building with specific options
 
-Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `bcndev/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
+Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius-network/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
 
 Below are the commands which remove OpenSSL support and switch from LMDB to SQLite by providing options to CMake:
 
 ```
-$bcndev> mkdir zelerius/build
-$bcndev> cd zelerius/build
-$bcndev/zelerius/build> cmake -DUSE_SSL=0 -DUSE_SQLITE=1 ..
-$bcndev/zelerius/build> time make -j4
+$zelerius-network> mkdir zelerius/build
+$zelerius-network> cd zelerius/build
+$zelerius-network/zelerius/build> cmake -DUSE_SSL=0 -DUSE_SQLITE=1 ..
+$zelerius-network/zelerius/build> time make -j4
 ```
 
 ## Building on Mac OSX
@@ -106,33 +106,33 @@ Then open terminal and install CMake and Boost:
 * `brew install cmake`
 * `brew install boost`
 
-Create directory `bcndev` somewhere and go there:
+Create directory `zelerius-network` somewhere and go there:
 ```
-$~/Downloads> mkdir bcndev
-$~/Downloads> cd bcndev
+$~/Downloads> mkdir zelerius-network
+$~/Downloads> cd zelerius-network
 ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$bcndev> git clone https://github.com/bcndev/zelerius.git
+$zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
 ```
 
-Put LMDB source code in `bcndev` folder (source files are referenced via relative paths, so you do not need to separately build it):
+Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$bcndev> git clone https://github.com/LMDB/lmdb.git
+$zelerius-network> git clone https://github.com/LMDB/lmdb.git
 ```
 
 Create build directory inside zelerius, go there and run CMake and Make:
 ```
-$bcndev> mkdir zelerius/build
-$bcndev> cd zelerius/build
-$bcndev/zelerius/build> cmake -DUSE_SSL=0 ..
-$bcndev/zelerius/build> time make -j4
+$zelerius-network> mkdir zelerius/build
+$zelerius-network> cd zelerius/build
+$zelerius-network/zelerius/build> cmake -DUSE_SSL=0 ..
+$zelerius-network/zelerius/build> time make -j4
 ```
 
 Check built binaries by running them from `../bin` folder:
 ```
-$bcndev/zelerius/build> ../bin/zeleriusd -v
+$zelerius-network/zelerius/build> ../bin/zeleriusd -v
 ```
 
 ### Building with specific options
@@ -152,35 +152,35 @@ $~/Downloads/boost_1_67_0> ./bootstrap.sh
 $~/Downloads/boost_1_67_0> ./b2 -a -j 4 cxxflags="-stdlib=libc++ -std=c++14 -mmacosx-version-min=10.11 -isysroot/Users/user/Downloads/MacOSX10.11.sdk" install`
 ```
 
-Install OpenSSL to `bcndev/openssl` folder:
+Install OpenSSL to `zelerius-network/openssl` folder:
 ```
-$~/Downloads/bcndev> git clone https://github.com/openssl/openssl.git
-$~/Downloads/bcndev> cd openssl
+$~/Downloads/zelerius-network> git clone https://github.com/openssl/openssl.git
+$~/Downloads/zelerius-network> cd openssl
 ```
 
 If you need binaries to run on all versions of OS X starting from El Capitan, you need to build OpenSSL targeting El Capitan SDK.
 ```
-$bcndev/openssl> ./Configure darwin64-x86_64-cc no-shared -mmacosx-version-min=10.11 -isysroot/Users/user/Downloads/MacOSX10.11.sdk
+$zelerius-network/openssl> ./Configure darwin64-x86_64-cc no-shared -mmacosx-version-min=10.11 -isysroot/Users/user/Downloads/MacOSX10.11.sdk
 ```
 Otherwise just use
 ```
-$bcndev/openssl> ./Configure darwin64-x86_64-cc no-shared
+$zelerius-network/openssl> ./Configure darwin64-x86_64-cc no-shared
 ```
 
 ```
-$bcndev/openssl> time make -j4
-$bcndev/openssl> cd ..
+$zelerius-network/openssl> time make -j4
+$zelerius-network/openssl> cd ..
 ```
 
-Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `bcndev/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
+Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius-network/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
 
 You add OpenSSL support or switch from LMDB to SQLite by providing options to CMake:
 
 ```
-$bcndev> mkdir zelerius/build
-$bcndev> cd zelerius/build
-$bcndev/zelerius/build> cmake -DUSE_SSL=1 -DUSE_SQLITE=1 ..
-$bcndev/zelerius/build> time make -j4
+$zelerius-network> mkdir zelerius/build
+$zelerius-network> cd zelerius/build
+$zelerius-network/zelerius/build> cmake -DUSE_SSL=1 -DUSE_SQLITE=1 ..
+$zelerius-network/zelerius/build> time make -j4
 ```
 
 ## Building on Windows
@@ -188,51 +188,51 @@ $bcndev/zelerius/build> time make -j4
 You need Microsoft Visual Studio Community 2017. [Download](https://www.visualstudio.com/vs/) and install it selecting `C++`, `git`, `cmake integration` packages.
 Run `Visual Studio x64 command prompt` from start menu.
 
-Create directory `bcndev` somewhere:
+Create directory `zelerius-network` somewhere:
 ```
-$C:\> mkdir bcndev
-$C:\> cd bcndev
+$C:\> mkdir zelerius-network
+$C:\> cd zelerius-network
 ```
 
-Get [Boost](https://boost.org) and unpack it into a folder inside `bcndev` and rename it from `boost_1_66_0` or similar to just `boost`.
+Get [Boost](https://boost.org) and unpack it into a folder inside `zelerius-network` and rename it from `boost_1_66_0` or similar to just `boost`.
 
 Build boost (build 32-bit boost version only if you need 32-bit zelerius binaries).
 ```
 $> cd boost
-$C:\bcndev\boost> bootstrap.bat
-$C:\bcndev\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage
-$C:\bcndev\boost> b2.exe address-model=32 link=static -j 8 --build-dir=build32 --stagedir=stage32
+$C:\zelerius-network\boost> bootstrap.bat
+$C:\zelerius-network\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage
+$C:\zelerius-network\boost> b2.exe address-model=32 link=static -j 8 --build-dir=build32 --stagedir=stage32
 cd ..
 ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$C:\bcndev> git clone https://github.com/bcndev/zelerius.git
+$C:\zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
 ```
 
 Put LMDB in the same folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$C:\bcndev> git clone https://github.com/LMDB/lmdb.git
+$C:\zelerius-network> git clone https://github.com/LMDB/lmdb.git
 ```
 
 You need to build openssl, first install ActivePerl (select "add to PATH" option, then restart console):
 ```
-$C:\bcndev> git clone https://github.com/openssl/openssl.git
-$C:\bcndev> cd openssl
-$C:\bcndev\openssl> perl Configure VC-WIN64A no-shared no-asm
-$C:\bcndev\openssl> nmake
-$C:\bcndev\openssl> cd ..
+$C:\zelerius-network> git clone https://github.com/openssl/openssl.git
+$C:\zelerius-network> cd openssl
+$C:\zelerius-network\openssl> perl Configure VC-WIN64A no-shared no-asm
+$C:\zelerius-network\openssl> nmake
+$C:\zelerius-network\openssl> cd ..
 ```
 If you want to build 32-bit binaries, you will also need 32-bit build of openssl in separate folder (configuring openssl changes header files, so there is no way to have both 32-bit and 64-bit versions in the same folder):
 ```
-$C:\bcndev> git clone https://github.com/openssl/openssl.git openssl32
-$C:\bcndev> cd openssl32
-$C:\bcndev\openssl> perl Configure VC-WIN32 no-shared no-asm
-$C:\bcndev\openssl> nmake
-$C:\bcndev\openssl> cd ..
+$C:\zelerius-network> git clone https://github.com/openssl/openssl.git openssl32
+$C:\zelerius-network> cd openssl32
+$C:\zelerius-network\openssl> perl Configure VC-WIN32 no-shared no-asm
+$C:\zelerius-network\openssl> nmake
+$C:\zelerius-network\openssl> cd ..
 ```
 
-Now launch Visual Studio, in File menu select `Open Folder`, select `C:\bcndev\zelerius` folder.
+Now launch Visual Studio, in File menu select `Open Folder`, select `C:\zelerius-network\zelerius` folder.
 Wait until CMake finishes running and `Build` appears in main menu.
 Select `x64-Debug` or `x64-Release` from standard toolbar, and then `Build/Build Solution` from the main menu.
 

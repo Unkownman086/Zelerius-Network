@@ -19,14 +19,14 @@ static const char USAGE[] =
     R"(bytecoind )" bytecoin_VERSION_STRING R"(.
 
 Usage:
-  bytecoind [options]
-  bytecoind --help | -h
-  bytecoind --version | -v
+  zeleriusd [options]
+  zeleriusd --help | -h
+  zeleriusd --version | -v
 
 Options:
-  --p2p-bind-address=<ip:port>           IP and port for P2P network protocol [default: 0.0.0.0:8080].
-  --p2p-external-port=<port>             External port for P2P network protocol, if port forwarding used with NAT [default: 8080].
-  --bytecoind-bind-address=<ip:port>     IP and port for bytecoind RPC API [default: 127.0.0.1:8081].
+  --p2p-bind-address=<ip:port>           IP and port for P2P network protocol [default: 0.0.0.0:48080].
+  --p2p-external-port=<port>             External port for P2P network protocol, if port forwarding used with NAT [default: 48080].
+  --zeleriusd-bind-address=<ip:port>     IP and port for bytecoind RPC API [default: 127.0.0.1:48081].
   --seed-node-address=<ip:port>          Specify list (one or more) of nodes to start connecting to.
   --priority-node-address=<ip:port>      Specify list (one or more) of nodes to connect to and attempt to keep the connection open.
   --exclusive-node-address=<ip:port>     Specify list (one or more) of nodes to connect to only. All other nodes including seed nodes will be ignored.
@@ -36,7 +36,7 @@ Options:
   --archive                              Work as an archive node [default: off].
   --data-folder=<folder-path>            Folder for blockchain, logs and peer DB [default: )" platform_DEFAULT_DATA_FOLDER_PATH_PREFIX
     R"(bytecoin].
-  --bytecoind-authorization=<usr:pass>   HTTP basic authentication credentials for RPC API.)"
+  --zeleriusd-authorization=<usr:pass>   HTTP basic authentication credentials for RPC API.)"
 #if platform_USE_SSL
     R"(
   --ssl-certificate-pem-file=<file-path> Full path to file containing both server SSL certificate and private key in PEM format.

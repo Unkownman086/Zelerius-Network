@@ -34,18 +34,18 @@ Options:
   --set-password                        Read new password as a line from stdin (twice) and re-encrypt wallet file.
   --export-view-only=<file-path>        Export view-only version of wallet file with the same password, then exit.
   --export-keys                         Export wallet keys to stdout, then exit.
-  --walletd-bind-address=<ip:port>      IP and port for walletd RPC API [default: 127.0.0.1:8070].
+  --walletd-bind-address=<ip:port>      IP and port for walletd RPC API [default: 127.0.0.1:48082].
   --data-folder=<foler-path>            Folder for wallet cache, blockchain, logs and peer DB [default: )" platform_DEFAULT_DATA_FOLDER_PATH_PREFIX
     R"(bytecoin].
-  --bytecoind-remote-address=<ip:port>  Connect to remote bytecoind and suppress running built-in bytecoind.
-  --bytecoind-authorization=<user:pass> HTTP basic authentication credentials for RPC API.
+  --zeleriusd-remote-address=<ip:port>  Connect to remote bytecoind and suppress running built-in bytecoind.
+  --zeleriusd-authorization=<user:pass> HTTP basic authentication credentials for RPC API.
   --backup-wallet-data=<folder-path>    Perform hot backup of wallet file, history, payment queue and wallet cache into specified backup data folder, then exit.
   --net=<main|test>                     Configure for mainnet or testnet [default: main].
 
-Options for built-in bytecoind (run when no --bytecoind-remote-address specified):
-  --p2p-bind-address=<ip:port>          IP and port for P2P network protocol [default: 0.0.0.0:8080].
-  --p2p-external-port=<port>            External port for P2P network protocol, if port forwarding used with NAT [default: 8080].
-  --bytecoind-bind-address=<ip:port>    IP and port for bytecoind RPC [default: 127.0.0.1:8081].
+Options for built-in bytecoind (run when no --zeleriusd-remote-address specified):
+  --p2p-bind-address=<ip:port>          IP and port for P2P network protocol [default: 0.0.0.0:48080].
+  --p2p-external-port=<port>            External port for P2P network protocol, if port forwarding used with NAT [default: 48080].
+  --zeleriusd-bind-address=<ip:port>    IP and port for bytecoind RPC [default: 127.0.0.1:48081].
   --seed-node-address=<ip:port>         Specify list (one or more) of nodes to start connecting to.
   --priority-node-address=<ip:port>     Specify list (one or more) of nodes to connect to and attempt to keep the connection open.
   --exclusive-node-address=<ip:port>    Specify list (one or more) of nodes to connect to only. All other nodes including seed nodes will be ignored.)";
@@ -262,11 +262,10 @@ int main(int argc, const char *argv[]) try {
 	}
 	std::cout << "Enter HTTP authorization <user>:<password> for walletd RPC: " << std::flush;
     std::string auth;
-    /*if (!console_setup.getline(auth, true)) {
+    if (!console_setup.getline(auth, true)) {
 		std::cout << "Unexpected end of stdin" << std::endl;
 		return api::WALLETD_WRONG_ARGS;
-    }*/
-    auth = "sam:pepito";
+    }
 	boost::algorithm::trim(auth);
 	config.walletd_authorization = common::base64::encode(BinaryArray(auth.data(), auth.data() + auth.size()));
 	if (config.walletd_authorization.empty()) {

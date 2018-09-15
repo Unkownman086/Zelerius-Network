@@ -60,7 +60,7 @@ void WalletSync::send_get_status() {
 			    advance_sync();
 		    } else if (response.r.status == 401) {
 			    m_sync_error = "AUTHORIZATION_FAILED";
-			    m_log(logging::INFO) << "Wrong daemon password - please check --bytecoind-authorization" << std::endl;
+                m_log(logging::INFO) << "Wrong daemon password - please check --zeleriusd-authorization" << std::endl;
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else {
 			    api::bytecoind::GetStatus::Response resp;
@@ -119,7 +119,7 @@ void WalletSync::send_sync_pool() {
 		    m_log(logging::TRACE) << "Received SyncMemPool response status=" << response.r.status << std::endl;
 		    if (response.r.status == 401) {
 			    m_sync_error = "AUTHORIZATION_FAILED";
-			    m_log(logging::INFO) << "Wrong daemon password - please check --bytecoind-authorization" << std::endl;
+                m_log(logging::INFO) << "Wrong daemon password - please check --zeleriusd-authorization" << std::endl;
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else if (response.r.status == 410) {
 			    m_sync_error = "WRONG_DAEMON_VERSION";
@@ -165,7 +165,7 @@ void WalletSync::send_get_blocks() {
 		    m_log(logging::TRACE) << "Received SyncBlocks response status=" << response.r.status << std::endl;
 		    if (response.r.status == 401) {
 			    m_sync_error = "AUTHORIZATION_FAILED";
-			    m_log(logging::INFO) << "Wrong daemon password - please check --bytecoind-authorization" << std::endl;
+                m_log(logging::INFO) << "Wrong daemon password - please check --zeleriusd-authorization" << std::endl;
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else if (response.r.status == 410) {
 			    m_sync_error = "WRONG_DAEMON_VERSION";
@@ -212,7 +212,7 @@ bool WalletSync::send_send_transaction() {
 		    m_log(logging::TRACE) << "Received send_transaction response status=" << response.r.status << std::endl;
 		    if (response.r.status == 401) {
 			    m_sync_error = "AUTHORIZATION_FAILED";
-			    m_log(logging::INFO) << "Wrong daemon password - please check --bytecoind-authorization" << std::endl;
+                m_log(logging::INFO) << "Wrong daemon password - please check --zeleriusd-authorization" << std::endl;
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else if (response.r.status == 200) {
 			    m_sync_error = "SEND_ERROR";
