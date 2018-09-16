@@ -36,8 +36,8 @@ Options:
   --export-keys                         Export wallet keys to stdout, then exit.
   --walletd-bind-address=<ip:port>      IP and port for walletd RPC API [default: 127.0.0.1:48082].
   --data-folder=<foler-path>            Folder for wallet cache, blockchain, logs and peer DB [default: )" platform_DEFAULT_DATA_FOLDER_PATH_PREFIX
-    R"(bytecoin].
-  --zeleriusd-remote-address=<ip:port>  Connect to remote bytecoind and suppress running built-in bytecoind.
+    R"(zelerius].
+  --zeleriusd-remote-address=<ip:port>  Connect to remote zeleriusd and suppress running built-in bytecoind.
   --zeleriusd-authorization=<user:pass> HTTP basic authentication credentials for RPC API.
   --backup-wallet-data=<folder-path>    Perform hot backup of wallet file, history, payment queue and wallet cache into specified backup data folder, then exit.
   --net=<main|test>                     Configure for mainnet or testnet [default: main].

@@ -7,7 +7,7 @@ Welcome to the repository of zelerius. Here you will find source code, instructi
 Contents
 * Building on Linux 64-bit
 * Building on Mac OSX
-* Building on Windowszelerius-network
+* Building on Windows
 * Building on other platforms
 
 ## Building on Linux 64-bit
@@ -61,7 +61,7 @@ To go futher you have to have a number of packages and utilities. You need at le
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
+$zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
 Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
@@ -114,7 +114,7 @@ $~/Downloads> cd zelerius-network
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
+$zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
 Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
@@ -207,7 +207,7 @@ cd ..
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$C:\zelerius-network> git clone https://github.com/zelerius-network/zelerius.git
+$C:\zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
 Put LMDB in the same folder (source files are referenced via relative paths, so you do not need to separately build it):

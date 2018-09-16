@@ -35,7 +35,7 @@ Options:
   --net=<main|test>                      Configure for mainnet or testnet [default: main].
   --archive                              Work as an archive node [default: off].
   --data-folder=<folder-path>            Folder for blockchain, logs and peer DB [default: )" platform_DEFAULT_DATA_FOLDER_PATH_PREFIX
-    R"(bytecoin].
+    R"(zelerius].
   --zeleriusd-authorization=<usr:pass>   HTTP basic authentication credentials for RPC API.)"
 #if platform_USE_SSL
     R"(
