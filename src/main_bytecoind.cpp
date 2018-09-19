@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) try {
 		config.ssl_certificate_password = ssl_certificate_password;
 	}
 
-	platform::ExclusiveLock coin_lock(coin_folder, "bytecoind.lock");
+    platform::ExclusiveLock coin_lock(coin_folder, "zeleriusd.lock");
 
 	logging::LoggerManager log_manager;
 	log_manager.configure_default(config.get_data_folder("logs"), "bytecoind-");
@@ -135,7 +135,7 @@ int main(int argc, const char *argv[]) try {
 
 	auto idea_ms =
 	    std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - idea_start);
-	std::cout << "bytecoind started seconds=" << double(idea_ms.count()) / 1000 << std::endl;
+    std::cout << "zeleriusd started seconds=" << double(idea_ms.count()) / 1000 << std::endl;
 	while (!io.stopped()) {
 		if (node.on_idle())  // Using it to load blockchain
 			io.poll();

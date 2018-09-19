@@ -41,7 +41,7 @@ public:
 	const Currency &get_currency() const { return m_currency; }
 	uint32_t get_next_effective_median_size() const;
 
-	std::vector<api::Output> get_random_outputs(Amount, size_t outs_count, Height, Timestamp) const;
+    std::vector<api::Output> get_random_outputs(Amount, size_t output_count, Height confirmed_height, Timestamp) const;
 	typedef std::vector<std::vector<uint32_t>> BlockGlobalIndices;
 	bool read_block_output_global_indices(const Hash &bid, BlockGlobalIndices *) const;
 

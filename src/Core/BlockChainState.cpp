@@ -1246,23 +1246,23 @@ bool BlockChainState::read_block_output_global_indices(const Hash &bid, BlockGlo
 }
 
 std::vector<api::Output> BlockChainState::get_random_outputs(
-    Amount amount, size_t outs_count, Height height, Timestamp time) const {
+    Amount amount, size_t output_count, Height confirmed_height, Timestamp time) const {
 	std::vector<api::Output> result;
 	uint32_t total_count = next_global_index_for_amount(amount);
 	// We might need better algorithm if we have lots of locked amounts
-	if (total_count <= outs_count) {
+    if (total_count <= output_count) {
 		for (uint32_t i = 0; i != total_count; ++i) {
 			api::Output item;
 			UnlockTimePublickKeyHeightSpent unp;
-			item.amount       = amount;
-			item.global_index = i;
+            item.amount       = amount;
+            item.global_index = i;
 			invariant(read_amount_output(amount, i, &unp), "global amount < total_count not found");
 			item.unlock_time = unp.unlock_time;
 			item.public_key  = unp.public_key;
 			item.height      = unp.height;
-			if (unp.spent || unp.height > height )
+            if (unp.spent || unp.height > confirmed_height )
 				continue;
-			if( !m_currency.is_transaction_spend_time_unlocked(item.unlock_time, height, time))
+            if( !m_currency.is_transaction_spend_time_unlocked(item.unlock_time, confirmed_height, time))
 				continue;
 			result.push_back(item);
 		}
@@ -1272,7 +1272,7 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
 	crypto::random_engine<uint64_t> generator;
 	std::lognormal_distribution<double> distribution(1.9, 1.0);
 	size_t attempts = 0;
-	for (; result.size() < outs_count && attempts < outs_count * 20; ++attempts) {  // TODO - 20
+    for (; result.size() < output_count && attempts < output_count * 20; ++attempts) {  // TODO - 20
 		//		uint32_t num = crypto::rand<uint32_t>();
 		//		num %= total_count;  // 0 handled in if above
 		double sample = distribution(generator);
@@ -1290,9 +1290,15 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
 		item.unlock_time = unp.unlock_time;
 		item.public_key  = unp.public_key;
 		item.height      = unp.height;
-		if (unp.spent || unp.height > height )
+        if (unp.spent || unp.height > confirmed_height ) {
+            if (confirmed_height + 128 < get_tip_height())
+                total_count = num;
+            // heuristic - if confirmed_height is deep, the area under ditribution curve
+            // with height < confirmed_height might be very small, so we adjust total_count
+            // to get descent results after small number of attempts
 			continue;
-		if( !m_currency.is_transaction_spend_time_unlocked(item.unlock_time, height, time))
+        }
+        if( !m_currency.is_transaction_spend_time_unlocked(item.unlock_time, confirmed_height, time))
 			continue;
 		result.push_back(item);
 	}

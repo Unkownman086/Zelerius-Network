@@ -238,9 +238,9 @@ int main(int argc, const char *argv[]) try {
 	std::unique_ptr<platform::ExclusiveLock> blockchain_lock;
 	try {
 		if (!config.bytecoind_remote_port)
-			blockchain_lock = std::make_unique<platform::ExclusiveLock>(coin_folder, "bytecoind.lock");
+            blockchain_lock = std::make_unique<platform::ExclusiveLock>(coin_folder, "zeleriusd.lock");
 	} catch (const platform::ExclusiveLock::FailedToLock &ex) {
-		std::cout << "Bytecoind already running - " << ex.what() << std::endl;
+        std::cout << "Zeleriusd already running - " << ex.what() << std::endl;
 		return api::BYTECOIND_ALREADY_RUNNING;
 	}
 	std::unique_ptr<platform::ExclusiveLock> walletcache_lock;

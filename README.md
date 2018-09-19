@@ -16,83 +16,84 @@ All commands below are adapted for Ubuntu, other distributions may need an other
 
 ### Building with standard options
 
-Create directory `zelerius-network` somewhere and go there:
+Create directory `zelerius` somewhere and go there:
 ```
-$> mkdir zelerius-network
-$> cd zelerius-network
+$> mkdir zelerius
+$> cd zelerius
 ```
 
 To go futher you have to have a number of packages and utilities. You need at least gcc 5.4.
 
 * `build-essential` package:
     ```
-    $zelerius-network> sudo apt-get install build-essential
+    $zelerius> sudo apt-get install build-essential
     ```
 
 * CMake (3.5 or newer):
     ```
-    $zelerius-network> sudo apt-get install cmake
-    $zelerius-network> cmake --version
+    $zelerius> sudo apt-get install cmake
+    $zelerius> cmake --version
     ```
     If version is too old, follow instructions on [the official site](https://cmake.org/download/).
 
 * Boost (1.62 or newer):
-    You need boost in `zelerius-network` folder. We do not configure to use boost installed by `apt-get`, because it is sometimes updated without your control by installing some unrelated packages. Also some users reported crashes after `find_package` finds headers from one version of boost and libraries from different version, or if installed boost uses dynamic linking.
+    You need boost in `zelerius` folder. We do not configure to use boost installed by `apt-get`, because it is sometimes updated without your control by installing some unrelated packages. Also some users reported crashes after `find_package` finds headers from one version of boost and libraries from different version, or if installed boost uses dynamic linking.
     ```
-    $zelerius-network> wget -c 'http://sourceforge.net/projects/boost/files/boost/1.67.0/boost_1_67_0.tar.bz2/download'
-    $zelerius-network> tar xf download
-    $zelerius-network> rm download
-    $zelerius-network> mv boost_1_67_0 boost
-    $zelerius-network> cd boost
-    $zelerius-network/boost> ./bootstrap.sh
-    $zelerius-network/boost> ./b2 link=static -j 8 --build-dir=build64 --stagedir=stage
+    $zelerius> wget -c 'http://sourceforge.net/projects/boost/files/boost/1.67.0/boost_1_67_0.tar.bz2/download'
+    $zelerius> tar xf download
+    $zelerius> rm download
+    $zelerius> mv boost_1_67_0 boost
+    $zelerius> cd boost
+    $zelerius/boost> ./bootstrap.sh
+    $zelerius/boost> ./b2 link=static -j 8 --build-dir=build64 --stagedir=stage
     cd ..
     ```
 
 * OpenSSL (1.1.1 or newer):
-    Install OpenSSL to `zelerius-network/openssl` folder. (In below commands use switch `linux-x86_64-clang` instead of `linux-x86_64` if using clang.)
+    Install OpenSSL to `zelerius/openssl` folder. (In below commands use switch `linux-x86_64-clang` instead of `linux-x86_64` if using clang.)
     ```
-    $zelerius-network> git clone https://github.com/openssl/openssl.git
-    $zelerius-network> cd openssl
-    $zelerius-network/openssl> ./Configure linux-x86_64 no-shared
-    $zelerius-network/openssl> time make -j4
-    $zelerius-network/openssl> cd ..
+    $zelerius> git clone https://github.com/openssl/openssl.git
+    $zelerius> cd openssl
+    $zelerius/openssl> ./Configure linux-x86_64 no-shared
+    $zelerius/openssl> time make -j4
+    $zelerius/openssl> cd ..
     ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
+$zelerius> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
-Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
+Put LMDB source code in `zelerius` folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$zelerius-network> git clone https://github.com/LMDB/lmdb.git
+$zelerius> git clone https://github.com/LMDB/lmdb.git
 ```
 
-Create build directory inside zelerius, go there and run CMake and Make:
+Create build directory inside `Zelerius-Network`, go there and run CMake and Make:
 ```
-$zelerius-network> mkdir zelerius/build
-$zelerius-network> cd zelerius/build
-$zelerius-network/zelerius/build> cmake ..
-$zelerius-network/zelerius/build> time make -j4
+$zelerius> cd Zelerius-Network
+$zelerius/Zelerius-Network> mkdir Zelerius-Network/build
+$zelerius/Zelerius-Network> cd Zelerius-Network/build
+$zelerius/zelerius/Zelerius-Network/build> cmake ..
+$zelerius/zelerius/Zelerius-Network/build> time make -j4 (4 is an example, it is the number of CPU threads)
 ```
 
 Check built binaries by running them from `../bin` folder
 ```
-$zelerius-network/zelerius/build> ../bin/zeleriusd -v
+$zelerius/zelerius/Zelerius-Network/build> ../bin/zeleriusd -v
 ```
 
 ### Building with specific options
 
-Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius-network/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
+Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
 
 Below are the commands which remove OpenSSL support and switch from LMDB to SQLite by providing options to CMake:
 
 ```
-$zelerius-network> mkdir zelerius/build
-$zelerius-network> cd zelerius/build
-$zelerius-network/zelerius/build> cmake -DUSE_SSL=0 -DUSE_SQLITE=1 ..
-$zelerius-network/zelerius/build> time make -j4
+$zelerius/Zelerius-Network> mkdir Zelerius-Network/build
+$zelerius/Zelerius-Network> cd Zelerius-Network/build
+$zelerius/Zelerius-Network/build> cmake -DUSE_SSL=0 -DUSE_SQLITE=1 ..
+$zelerius/Zelerius-Network/build> time make -j4 (4 is an example, it is the number of CPU threads)
 ```
 
 ## Building on Mac OSX
@@ -106,42 +107,43 @@ Then open terminal and install CMake and Boost:
 * `brew install cmake`
 * `brew install boost`
 
-Create directory `zelerius-network` somewhere and go there:
+Create directory `zelerius` somewhere and go there:
 ```
-$~/Downloads> mkdir zelerius-network
-$~/Downloads> cd zelerius-network
+$~/Downloads> mkdir zelerius
+$~/Downloads> cd zelerius
 ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
+$zelerius> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
-Put LMDB source code in `zelerius-network` folder (source files are referenced via relative paths, so you do not need to separately build it):
+Put LMDB source code in `zelerius` folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$zelerius-network> git clone https://github.com/LMDB/lmdb.git
+$zelerius> git clone https://github.com/LMDB/lmdb.git
 ```
 
 Create build directory inside zelerius, go there and run CMake and Make:
 ```
-$zelerius-network> mkdir zelerius/build
-$zelerius-network> cd zelerius/build
-$zelerius-network/zelerius/build> cmake -DUSE_SSL=0 ..
-$zelerius-network/zelerius/build> time make -j4
+$zelerius> cd Zelerius-Network
+$zelerius/Zelerius-Network> mkdir Zelerius-Network/build
+$zelerius/Zelerius-Network> cd Zelerius-Network/build
+$zelerius/Zelerius-Network/build> cmake -DUSE_SSL=0 ..
+$zelerius/Zelerius-Network/build> time make -j4 (4 is an example, it is the number of CPU threads)
 ```
 
 Check built binaries by running them from `../bin` folder:
 ```
-$zelerius-network/zelerius/build> ../bin/zeleriusd -v
+$zelerius/Zelerius-Network/build> ../bin/zeleriusd -v
 ```
 
 ### Building with specific options
 
-Binaries linked with Boost installed by Homebrew will work only on your computer's OS X version or newer, but not on older versions like El Capitan.
+Binaries linked with Boost installed by Homebrew will work only on your computer's OS X version or newer, but not on older versions like 10.13.
 
-If you need binaries to run on all versions of OS X starting from El Capitan, you need to build boost yourself targeting El Capitan SDK.
+If you need binaries to run on all versions of OS X starting from 10.13, you need to build boost yourself targeting 10.13.
 
-Download [Mac OSX 10.11 SDK](https://github.com/phracker/MacOSX-SDKs/releases) and unpack to it into `Downloads` folder
+Download [Mac OSX 10.13 SDK](https://github.com/phracker/MacOSX-SDKs/releases) and unpack to it into `Downloads` folder
 
 Download and unpack [Boost](https://boost.org) to `Downloads` folder.
 
@@ -152,35 +154,36 @@ $~/Downloads/boost_1_67_0> ./bootstrap.sh
 $~/Downloads/boost_1_67_0> ./b2 -a -j 4 cxxflags="-stdlib=libc++ -std=c++14 -mmacosx-version-min=10.11 -isysroot/Users/user/Downloads/MacOSX10.11.sdk" install`
 ```
 
-Install OpenSSL to `zelerius-network/openssl` folder:
+Install OpenSSL to `zelerius/openssl` folder:
 ```
-$~/Downloads/zelerius-network> git clone https://github.com/openssl/openssl.git
-$~/Downloads/zelerius-network> cd openssl
+$~/Downloads/zelerius> git clone https://github.com/openssl/openssl.git
+$~/Downloads/zelerius> cd openssl
 ```
 
-If you need binaries to run on all versions of OS X starting from El Capitan, you need to build OpenSSL targeting El Capitan SDK.
+If you need binaries to run on all versions of OS X starting from 10.13, you need to build OpenSSL targeting 10.13.
 ```
-$zelerius-network/openssl> ./Configure darwin64-x86_64-cc no-shared -mmacosx-version-min=10.11 -isysroot/Users/user/Downloads/MacOSX10.11.sdk
+$zelerius/openssl> ./Configure darwin64-x86_64-cc no-shared -mmacosx-version-min=10.13 -isysroot/Users/user/Downloads/MacOSX10.13.sdk
 ```
 Otherwise just use
 ```
-$zelerius-network/openssl> ./Configure darwin64-x86_64-cc no-shared
+$zelerius/openssl> ./Configure darwin64-x86_64-cc no-shared
 ```
 
 ```
-$zelerius-network/openssl> time make -j4
-$zelerius-network/openssl> cd ..
+$zelerius/openssl> time make -j4 (4 is an example, it is the number of CPU threads)
+$zelerius/openssl> cd ..
 ```
 
-Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius-network/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
+Download amalgamated [SQLite 3](https://www.sqlite.org/download.html) and unpack it into `zelerius/sqlite` folder (source files are referenced via relative paths, so you do not need to separately build it).
 
 You add OpenSSL support or switch from LMDB to SQLite by providing options to CMake:
 
 ```
-$zelerius-network> mkdir zelerius/build
-$zelerius-network> cd zelerius/build
-$zelerius-network/zelerius/build> cmake -DUSE_SSL=1 -DUSE_SQLITE=1 ..
-$zelerius-network/zelerius/build> time make -j4
+$zelerius> cd Zelerius-Network
+$zelerius/Zelerius-Network> mkdir Zelerius-Network/build
+$zelerius/Zelerius-Network> cd Zelerius-Network/build
+$zelerius/Zelerius-Network/build> cmake -DUSE_SSL=1 -DUSE_SQLITE=1 ..
+$zelerius/Zelerius-Network/build> time make -j4 (4 is an example, it is the number of CPU threads)
 ```
 
 ## Building on Windows
@@ -188,51 +191,51 @@ $zelerius-network/zelerius/build> time make -j4
 You need Microsoft Visual Studio Community 2017. [Download](https://www.visualstudio.com/vs/) and install it selecting `C++`, `git`, `cmake integration` packages.
 Run `Visual Studio x64 command prompt` from start menu.
 
-Create directory `zelerius-network` somewhere:
+Create directory `zelerius` somewhere:
 ```
-$C:\> mkdir zelerius-network
-$C:\> cd zelerius-network
+$C:\> mkdir zelerius
+$C:\> cd zelerius
 ```
 
-Get [Boost](https://boost.org) and unpack it into a folder inside `zelerius-network` and rename it from `boost_1_66_0` or similar to just `boost`.
+Get [Boost](https://boost.org) and unpack it into a folder inside `zelerius` and rename it from `boost_1_66_0` or similar to just `boost`.
 
 Build boost (build 32-bit boost version only if you need 32-bit zelerius binaries).
 ```
 $> cd boost
-$C:\zelerius-network\boost> bootstrap.bat
-$C:\zelerius-network\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage
-$C:\zelerius-network\boost> b2.exe address-model=32 link=static -j 8 --build-dir=build32 --stagedir=stage32
+$C:\zelerius\boost> bootstrap.bat
+$C:\zelerius\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage
+$C:\zelerius\boost> b2.exe address-model=32 link=static -j 8 --build-dir=build32 --stagedir=stage32
 cd ..
 ```
 
 Git-clone (or git-pull) zelerius source code in that folder:
 ```
-$C:\zelerius-network> git clone https://github.com/zelerius/Zelerius-Network
+$C:\zelerius> git clone https://github.com/zelerius/Zelerius-Network
 ```
 
 Put LMDB in the same folder (source files are referenced via relative paths, so you do not need to separately build it):
 ```
-$C:\zelerius-network> git clone https://github.com/LMDB/lmdb.git
+$C:\zelerius> git clone https://github.com/LMDB/lmdb.git
 ```
 
 You need to build openssl, first install ActivePerl (select "add to PATH" option, then restart console):
 ```
-$C:\zelerius-network> git clone https://github.com/openssl/openssl.git
-$C:\zelerius-network> cd openssl
-$C:\zelerius-network\openssl> perl Configure VC-WIN64A no-shared no-asm
-$C:\zelerius-network\openssl> nmake
-$C:\zelerius-network\openssl> cd ..
+$C:\zelerius> git clone https://github.com/openssl/openssl.git
+$C:\zelerius> cd openssl
+$C:\zelerius\openssl> perl Configure VC-WIN64A no-shared no-asm
+$C:\zelerius\openssl> nmake
+$C:\zelerius\openssl> cd ..
 ```
 If you want to build 32-bit binaries, you will also need 32-bit build of openssl in separate folder (configuring openssl changes header files, so there is no way to have both 32-bit and 64-bit versions in the same folder):
 ```
-$C:\zelerius-network> git clone https://github.com/openssl/openssl.git openssl32
-$C:\zelerius-network> cd openssl32
-$C:\zelerius-network\openssl> perl Configure VC-WIN32 no-shared no-asm
-$C:\zelerius-network\openssl> nmake
-$C:\zelerius-network\openssl> cd ..
+$C:\zelerius> git clone https://github.com/openssl/openssl.git openssl32
+$C:\zelerius> cd openssl32
+$C:\zelerius\openssl> perl Configure VC-WIN32 no-shared no-asm
+$C:\zelerius\openssl> nmake
+$C:\zelerius\openssl> cd ..
 ```
 
-Now launch Visual Studio, in File menu select `Open Folder`, select `C:\zelerius-network\zelerius` folder.
+Now launch Visual Studio, in File menu select `Open Folder`, select `C:\zelerius\Zelerius-Network` folder.
 Wait until CMake finishes running and `Build` appears in main menu.
 Select `x64-Debug` or `x64-Release` from standard toolbar, and then `Build/Build Solution` from the main menu.
 
