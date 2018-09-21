@@ -139,9 +139,9 @@ if(WIN32)
         link_directories(SYSTEM ../boost/stage32/lib) # must be before add_executable, add_library
     endif()
 endif()
-add_library(bytecoin-crypto ${SRC_CRYPTO})
-add_library(bytecoin-core ${SOURCE_FILES})
-target_link_libraries(bytecoin-core bytecoin-crypto)
+add_library(zelerius-crypto ${SRC_CRYPTO})
+add_library(zelerius-core ${SOURCE_FILES})
+target_link_libraries(zelerius-core zelerius-crypto)
 if(WIN32)
     add_executable(walletd src/main_walletd.cpp src/bytecoin.rc) # .rc works only if referenced directly in add_executable
     add_executable(zeleriusd src/main_bytecoind.cpp src/bytecoin.rc) # .rc works only if referenced directly in add_executable
@@ -158,9 +158,9 @@ add_executable(tests src/main_tests.cpp tests/io.hpp tests/Random.hpp
         tests/wallet_file/test_wallet_file.cpp tests/wallet_file/test_wallet_file.hpp)
 set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_BIND_NO_PLACEHOLDERS=1 -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE=1) # boost::_1 conflicts with std::_1
-target_link_libraries(walletd bytecoin-crypto bytecoin-core)
-target_link_libraries(zeleriusd bytecoin-crypto bytecoin-core)
-target_link_libraries(tests bytecoin-crypto bytecoin-core)
+target_link_libraries(walletd zelerius-crypto zelerius-core)
+target_link_libraries(zeleriusd zelerius-crypto zelerius-core)
+target_link_libraries(tests zelerius-crypto zelerius-core)
 if(WIN32)
 else()
     set(Boost_USE_MULTITHREADED OFF) # all boost libraries are multithreaded since some version
