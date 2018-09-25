@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <limits>
 
+#include "p2p/P2pProtocolTypes.hpp"
+
 // This approach allows unlimited customization through config file/command line parameters
 // Never include this header into other headers
 namespace bytecoin {
@@ -33,9 +35,24 @@ static_assert(EMISSION_SPEED_FACTOR <= 8 * sizeof(uint64_t), "Bad EMISSION_SPEED
 
 //BLOCK SIZE
 const size_t CRYPTONOTE_REWARD_BLOCKS_WINDOW = 100;
-const size_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE = 500000;  // size of block (bytes) after which reward for block calculated using block size
+const size_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE = 500000;
 const size_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2 = 20000;
 const size_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1 = 10000;
+const size_t CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5 = 100000;  // size of block (bytes) after which reward for block calculated using block size
+
+constexpr uint32_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY(uint32_t difficulty_target) {
+	return 24 * 60 * 60 / difficulty_target;
+}
+
+const size_t MAX_BLOCK_SIZE_INITIAL                  = 100000;
+const size_t MAX_BLOCK_SIZE_INITIAL_V5               = MAX_BLOCK_SIZE_INITIAL;
+
+const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR = 300000;
+const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR_V5 = 100 * 1024;
+
+constexpr uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_DENOMINATOR(uint32_t difficulty_target) {
+	return 365 * 24 * 60 * 60 / difficulty_target;
+}
 
 const size_t CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE = 600;
 const size_t CRYPTONOTE_DISPLAY_DECIMAL_POINT       = 12;
@@ -43,17 +60,6 @@ const size_t CRYPTONOTE_DISPLAY_DECIMAL_POINT       = 12;
 //FEE & DUST
 const uint64_t MINIMUM_FEE                          = 1000000;  // pow(10, 6)
 const uint64_t DEFAULT_DUST_THRESHOLD               = 1000000;  // pow(10, 6)
-
-
-constexpr uint32_t EXPECTED_NUMBER_OF_BLOCKS_PER_DAY(uint32_t difficulty_target) {
-	return 24 * 60 * 60 / difficulty_target;
-}
-
-const size_t MAX_BLOCK_SIZE_INITIAL                  = 100000;//20 * 1024;
-const uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR = 300000;//100 * 1024;
-constexpr uint64_t MAX_BLOCK_SIZE_GROWTH_SPEED_DENOMINATOR(uint32_t difficulty_target) {
-	return 365 * 24 * 60 * 60 / difficulty_target;
-}
 
 // After next hardfork remove settings below
 const uint32_t CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS = 1;
@@ -65,7 +71,8 @@ const uint32_t CRYPTONOTE_MEMPOOL_TX_LIVETIME = 60 * 60 * 24;  // seconds, one d
 
 const uint32_t UPGRADE_HEIGHT_V2 = 1;
 const uint32_t UPGRADE_HEIGHT_V3 = 2;
-const uint32_t UPGRADE_HEIGHT_V4 = 3;//CN Variant 1
+const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
+const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces block size ( ~ 06/oct/2018 )
 
 const char CRYPTONOTE_BLOCKS_FILENAME[]       = "blocks.bin";
 const char CRYPTONOTE_BLOCKINDEXES_FILENAME[] = "blockindexes.bin";
@@ -118,5 +125,11 @@ constexpr const CheckpointData CHECKPOINTS[] = {
     {10000,"9bbfd234a099d821459a0803f0780968a1bedc8bf236a3bb0047bb4c87ad962e"},
     {19001,"534a1c4899c1f3154927beef315aea4a9c4de1a80def68f12f1ac07b1cf84188"}
 };
+
+const char GENESIS_COINBASE_TX_HEX[] =
+        "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
+
+// ZELERIUSvxxxxxx1
+const UUID BYTECOIN_NETWORK{{0x5a, 0x45, 0x4c, 0x45, 0x52, 0x49, 0x55, 0x53, 0x76, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x31}};
 
 }  // CryptoNote

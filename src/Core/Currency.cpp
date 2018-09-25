@@ -72,14 +72,18 @@ Currency::Currency(bool is_testnet)
     , difficulty_window_lwma2(parameters::DIFFICULTY_WINDOW_LWMA2)
     , difficulty_limit(parameters::DIFFICULTY_LIMIT)
     , max_block_size_initial(parameters::MAX_BLOCK_SIZE_INITIAL)
+    , max_block_size_initial_v5(parameters::MAX_BLOCK_SIZE_INITIAL_V5)
     , max_block_size_growth_speed_numerator(parameters::MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR)
+    , max_block_size_growth_speed_numerator_v5(parameters::MAX_BLOCK_SIZE_GROWTH_SPEED_NUMERATOR_V5)
     , max_block_size_growth_speed_denominator(parameters::MAX_BLOCK_SIZE_GROWTH_SPEED_DENOMINATOR(difficulty_target))
     , locked_tx_allowed_delta_seconds(parameters::CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS(difficulty_target))
     , locked_tx_allowed_delta_blocks(parameters::CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS)
     , upgrade_height_v2(parameters::UPGRADE_HEIGHT_V2)
     , upgrade_height_v3(parameters::UPGRADE_HEIGHT_V3)
     , upgrade_height_v4(parameters::UPGRADE_HEIGHT_V4)
+    , upgrade_height_v5(parameters::UPGRADE_HEIGHT_V5)
     , current_transaction_version(CURRENT_TRANSACTION_VERSION)
+    , genesis_coinbase_tx_hex(GENESIS_COINBASE_TX_HEX)
     {
 	if (is_testnet) {
 		upgrade_height_v2 = 0;
@@ -88,7 +92,7 @@ Currency::Currency(bool is_testnet)
 	// Hard code coinbase tx in genesis block, because through generating tx use
 	// random, but genesis should be always
 	// the same
-    std::string genesis_coinbase_tx_hex = "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
+    //std::string genesis_coinbase_tx_hex = "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
 	BinaryArray miner_tx_blob;
 
 	bool r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
@@ -164,7 +168,9 @@ uint8_t Currency::get_block_major_version_for_height(Height height) const {
         return 2;
     if (height > upgrade_height_v3 && height <= upgrade_height_v4)
         return 3;
-    return 4; // info.height > currency.upgrade_height_v4
+    if (height > upgrade_height_v4 && height <= upgrade_height_v5)
+        return 4;
+    return 5;
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
@@ -178,6 +184,8 @@ uint8_t Currency::get_block_minor_version_for_height(Height height) const {
 }
 
 uint32_t Currency::block_granted_full_reward_zone_by_block_version(uint8_t block_major_version) const {
+    if (block_major_version >= 5)
+        return bytecoin::parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5;
     if (block_major_version >= 4)
         return block_granted_full_reward_zone;
 	if (block_major_version >= 3)
@@ -193,8 +201,6 @@ bool Currency::get_block_reward(uint8_t block_major_version, size_t effective_me
 	assert(emission_speed_factor > 0 && emission_speed_factor <= 8 * sizeof(Amount));
 
 	Amount base_reward = (money_supply - already_generated_coins) >> emission_speed_factor;
-    /*if(already_generated_coins ==0)
-        base_reward = money_supply / 10;*/
 
     if (base_reward < parameters::FIXED_REWARD)
     {
@@ -217,10 +223,19 @@ Height Currency::largest_window() const {
 
 uint32_t Currency::max_block_cumulative_size(Height height) const {
 	assert(height <= std::numeric_limits<uint64_t>::max() / max_block_size_growth_speed_numerator);
-	uint64_t max_size = static_cast<uint64_t>(
-	    max_block_size_initial +
-	    (height * max_block_size_growth_speed_numerator) / max_block_size_growth_speed_denominator);
-	assert(max_size >= max_block_size_initial);
+
+    uint64_t max_size = 0;
+
+    if(get_block_major_version_for_height(height)<5)
+    {
+        max_size = static_cast<uint64_t>(max_block_size_initial + (height * max_block_size_growth_speed_numerator) / max_block_size_growth_speed_denominator);
+        assert(max_size >= max_block_size_initial);
+    }
+    else
+    {
+        max_size = static_cast<uint64_t>(max_block_size_initial_v5 + (height * max_block_size_growth_speed_numerator_v5) / max_block_size_growth_speed_denominator);
+        assert(max_size >= max_block_size_initial_v5);
+    }
 	return static_cast<uint32_t>(max_size);
 }
 
@@ -563,6 +578,7 @@ bool Currency::check_proof_of_work(const Hash &long_block_hash,
 	case 2:
     case 3:
     case 4:
+    case 5:
         return check_proof_of_work_v2(long_block_hash, block, current_difficulty);
 	}
 	//  logger(ERROR, BrightRed) << "Unknown block major version: " <<

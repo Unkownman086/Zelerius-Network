@@ -246,7 +246,10 @@ std::string BlockChainState::check_standalone_consensus(
 	info->block_size               = static_cast<uint32_t>(pb.coinbase_tx_size + cumulative_size);
 	auto max_block_cumulative_size = m_currency.max_block_cumulative_size(info->height);
 	if (info->block_size > max_block_cumulative_size)
+    {
+        //m_log(logging::ERROR) << "CUMULATIVE_BLOCK_SIZE_TOO_BIG - info->block_size: " << info->block_size << " max_block_cumulative_size: " << max_block_cumulative_size << std::endl;
 		return "CUMULATIVE_BLOCK_SIZE_TOO_BIG";
+    }
 
 	// block at UPGRADE_HEIGHT still has old version.
 	if (block.header.major_version != m_currency.get_block_major_version_for_height(info->height))
@@ -483,8 +486,7 @@ bool BlockChainState::create_mining_block_template(BlockTemplate *b, const Accou
         }
         else
         {
-
-            m_log(logging::INFO) << "create_mining_block_template Transaction " << tit->first
+            /*m_log(logging::INFO) << "create_mining_block_template Transaction " << tit->first
                                   << " tx_size + txs_size > block_size_limit" << std::endl
                                   << "tx_size: " << tx_size << " txs_size: " << txs_size
                                   << " block_size_limit: "<< block_size_limit << std::endl
@@ -493,7 +495,7 @@ bool BlockChainState::create_mining_block_template(BlockTemplate *b, const Accou
                                   << " m_currency.miner_tx_blob_reserved_size: " << m_currency.miner_tx_blob_reserved_size
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
-                                  << "effective_size_median: " << effective_size_median << std::endl;
+                                  << "effective_size_median: " << effective_size_median << std::endl;*/
 
         }
 		Amount single_fee = tit->second.fee;
@@ -685,8 +687,7 @@ bool BlockChainState::create_mining_block_template2(BlockTemplate *b, const Acco
 			continue;
         }else
         {
-
-            m_log(logging::INFO) << "create_mining_block_template2 Transaction " << tit->first
+            /*m_log(logging::INFO) << "create_mining_block_template2 Transaction " << tit->first
                                   << " tx_size + txs_size > block_size_limit" << std::endl
                                   << "tx_size: " << tx_size << " txs_size: " << txs_size
                                   << " block_size_limit: "<< block_size_limit << std::endl
@@ -695,7 +696,7 @@ bool BlockChainState::create_mining_block_template2(BlockTemplate *b, const Acco
                                   << " m_currency.miner_tx_blob_reserved_size: " << m_currency.miner_tx_blob_reserved_size
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
-                                  << "effective_size_median: " << effective_size_median << std::endl;
+                                  << "effective_size_median: " << effective_size_median << std::endl;*/
 
         }
 		Amount single_fee = tit->second.fee;
@@ -1290,7 +1291,7 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
 		item.unlock_time = unp.unlock_time;
 		item.public_key  = unp.public_key;
 		item.height      = unp.height;
-        if (unp.spent || unp.height > confirmed_height ) {
+        if (unp.height > confirmed_height ) {
             if (confirmed_height + 128 < get_tip_height())
                 total_count = num;
             // heuristic - if confirmed_height is deep, the area under ditribution curve
@@ -1298,6 +1299,8 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
             // to get descent results after small number of attempts
 			continue;
         }
+        if (unp.spent)
+                    continue;
         if( !m_currency.is_transaction_spend_time_unlocked(item.unlock_time, confirmed_height, time))
 			continue;
 		result.push_back(item);

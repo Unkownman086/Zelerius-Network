@@ -295,7 +295,7 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 	if (!response.transactions_required.empty())
 		return true;
 	if (m_last_node_status.next_block_effective_median_size == 0)
-		throw json_rpc::Error(json_rpc::INVALID_PARAMS, "Next block median size unknown, need to sync to bytecoind");
+        throw json_rpc::Error(json_rpc::INVALID_PARAMS, "Next block median size unknown, need to sync to zeleriusd");
 	if (request.confirmed_height_or_depth < 0)
 		request.confirmed_height_or_depth = std::max(0,
 		    static_cast<api::HeightOrDepth>(m_wallet_state.get_tip_height()) + 1 + request.confirmed_height_or_depth);

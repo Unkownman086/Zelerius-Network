@@ -61,7 +61,9 @@ public:
     Height difficulty_blocks_count() const { return difficulty_window_lwma2; }//difficulty_window + difficulty_lag; }
 	uint32_t expected_blocks_per_day() const { return 24 * 60 * 60 / difficulty_target; }
 	uint64_t max_block_size_initial;
+    uint64_t max_block_size_initial_v5;
 	uint64_t max_block_size_growth_speed_numerator;
+    uint64_t max_block_size_growth_speed_numerator_v5;
 	uint64_t max_block_size_growth_speed_denominator;
 
 	Timestamp locked_tx_allowed_delta_seconds;
@@ -69,13 +71,15 @@ public:
 
 	Height upgrade_height_v2;
 	Height upgrade_height_v3;
-
     Height upgrade_height_v4;
+    Height upgrade_height_v5;
 
 	uint8_t get_block_major_version_for_height(Height) const;
 	uint8_t get_block_minor_version_for_height(Height) const;
 
 	uint8_t current_transaction_version;
+
+    std::string genesis_coinbase_tx_hex;
 
 	size_t sw_checkpoint_count() const;
 	bool is_in_sw_checkpoint_zone(Height index) const;

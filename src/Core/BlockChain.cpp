@@ -173,7 +173,10 @@ BroadcastAction BlockChain::add_block(
 		std::exit(api::BYTECOIND_DATABASE_ERROR);
 	}
 	if (!check_error.empty())
+    {
+        m_log(logging::ERROR) << "check_error BAN! "<< check_error << std::endl;
 		return BroadcastAction::BAN;  // TODO - return check_error
+    }
 	if (!add_blod(*info)) {           // Has parent that does not pass through last SW checkpoint
 		if (info->height > m_currency.last_sw_checkpoint().first)
 			m_archive.add(Archive::BLOCK, pb.block_data, pb.bid, source_address);
