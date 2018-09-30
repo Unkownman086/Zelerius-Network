@@ -123,7 +123,8 @@ constexpr const CheckpointData CHECKPOINTS[] = {
     {4,"d8e4b50bc10c9d9d7653a8f8be6d9eca8002d8afa1a6ea98c89e3ffc04d50a27"},
     {5,"aed9def8c13daa8db58409050f0301c4ba481727f02eb40b27044d6930db35f2"},
     {10000,"9bbfd234a099d821459a0803f0780968a1bedc8bf236a3bb0047bb4c87ad962e"},
-    {19001,"534a1c4899c1f3154927beef315aea4a9c4de1a80def68f12f1ac07b1cf84188"}
+    {19001,"534a1c4899c1f3154927beef315aea4a9c4de1a80def68f12f1ac07b1cf84188"},
+    {45740,"6b1be5e528a5d2e5c5bec56ac0bbc46312d8ef4e6f1b036298310323c1f3ef5f"}
 };
 
 const char GENESIS_COINBASE_TX_HEX[] =
