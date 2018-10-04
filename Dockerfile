@@ -3,10 +3,6 @@
 FROM ubuntu:16.04 as builder
 LABEL Author="Tiago Peralta tperalta82@gmail.com"
 
-# If you have an old version of the docker, then
-# correct the previous line, it should be the
-# FROM fedora
-
 RUN set -ex \
     && apt-get update \
     && apt-get dist-upgrade -y \
