@@ -9,6 +9,7 @@ LABEL Author="Tiago Peralta tperalta82@gmail.com"
 
 RUN set -ex \
     && apt-get update \
+    && apt-get dist-upgrade -y \
     && apt-get -y install build-essential cmake curl git time libsqlite3-dev screen \
     && apt-get clean
 
@@ -30,15 +31,11 @@ RUN set -ex \
     && mv boost_${BOOST_VERSION} boost \
     && cd boost \
     && ./bootstrap.sh \
-    && ./b2 --build-type=minimal link=static -j4 runtime-link=static --with-chrono --with-date_time --with-filesystem --with-program_options --with-regex --with-serialization --with-system --with-thread --stagedir=stage threading=multi threadapi=pthread cflags="-fPIC" cxxflags="-fPIC" stage
+    && ./b2 link=static -j 8 --build-dir=build64 --stagedir=stage
 
 # LMDB
-ARG LMDB_VERSION=LMDB_0.9.22
-ARG LMDB_HASH=5033a08c86fb6ef0adddabad327422a1c0c0069a
 RUN set -ex \
-    && git clone https://github.com/LMDB/lmdb.git -b ${LMDB_VERSION} \
-    && cd lmdb \
-    && test `git rev-parse HEAD` = ${LMDB_HASH} || exit 1
+    && git clone https://github.com/LMDB/lmdb.git
 
 COPY . /app/zelerius
 
@@ -75,5 +72,4 @@ VOLUME [ "/root/.zelerius" ]
 VOLUME [ "/root/zelerius-wallet" ]
 EXPOSE  48080 48081 48082
 
-CMD ["/usr/local/bin/zeleriusd"]
 
