@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 namespace common {
 void invariant_violated(const char *expr, const char *file, int line, const std::string &msg);

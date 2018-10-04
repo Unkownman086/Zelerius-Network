@@ -43,11 +43,13 @@ if(USE_SQLITE)
     set(SRC_WARNINGS_DB ../sqlite/sqlite3.c)
     set(SRC_DB src/platform/DBsqlite3.cpp src/platform/DBsqlite3.hpp)
     add_definitions(-Dplatform_USE_SQLITE=1)
+        message(STATUS "SQLITE usage: ON")
 else()
     message(STATUS "Database selected: LMDB. Make sure it is put into ../lmdb/")
     include_directories(../lmdb/libraries/liblmdb)
     set(SRC_WARNINGS_DB ../lmdb/libraries/liblmdb/mdb.c ../lmdb/libraries/liblmdb/midl.c)
     set(SRC_DB src/platform/DBlmdb.cpp src/platform/DBlmdb.hpp)
+        message(STATUS "SQLITE usage: OFF")
 endif()
 if(USE_SSL)
     message(STATUS "SSL usage: ON. Make sure openssl headers are in " ${OPENSSL_ROOT} "/include and static libs are in " ${OPENSSL_ROOT} "/")
@@ -60,32 +62,21 @@ else()
 endif()
 file(GLOB SRC_CRYPTO
     src/crypto/*.cpp src/crypto/*.hpp src/crypto/*.h
-    src/crypto/blake256.c
-    src/crypto/chacha8.c
-    src/crypto/crypto-ops-data.c
-    src/crypto/crypto-ops.c
-    src/crypto/crypto-util.c
-    src/crypto/groestl.c
-    src/crypto/hash-extra-blake.c
-    src/crypto/hash-extra-groestl.c
-    src/crypto/hash-extra-jh.c
-    src/crypto/hash-extra-skein.c
-    src/crypto/hash.c
-    src/crypto/jh.c
-    src/crypto/keccak.c
-    src/crypto/oaes_lib.c
-    src/crypto/random.c
-    src/crypto/skein.c
-    src/crypto/slow-hash_x86.c
-    src/crypto/slow-hash_x86.inl
-    src/crypto/tree-hash.c
+    src/crypto/*.c src/crypto/*.h src/crypto/*.inl
+    src/crypto/bernstein/*.h src/crypto/bernstein/*.c
+    src/crypto/blake/*.h src/crypto/blake/*.c
+    src/crypto/groestl/*.h src/crypto/groestl/*.c
+    src/crypto/jh/*.h src/crypto/jh/*.c
+    src/crypto/keccak/*.c
+    src/crypto/oaes/*.h src/crypto/oaes/*.c
+    src/crypto/skein/*.h src/crypto/skein/*.c
 )
 file(GLOB SRC_COMMON src/common/*.cpp src/common/*.hpp)
 file(GLOB SRC_SERIALIZATION src/Serialization/*.cpp src/Serialization/*.hpp)
 file(GLOB SRC_SERIA src/seria/*.cpp src/seria/*.hpp)
 file(GLOB SRC_LOGGING src/logging/*.cpp src/logging/*.hpp)
 file(GLOB SRC_P2P src/p2p/*.cpp src/p2p/*.hpp)
-file(GLOB SRC_CORE src/Core/*.cpp src/Core/*.hpp)
+file(GLOB SRC_CORE src/Core/*.cpp src/Core/*.hpp src/CryptoNote.hpp src/rpc_api.hpp)
 file(GLOB SRC_HTTP src/http/*.cpp src/http/*.hpp)
 file(GLOB SRC_PLATFORM
     src/platform/ExclusiveLock.cpp src/platform/ExclusiveLock.hpp
@@ -95,7 +86,7 @@ file(GLOB SRC_PLATFORM
     src/platform/PathTools.cpp src/platform/PathTools.hpp
     src/platform/PreventSleep.cpp src/platform/PreventSleep.hpp
     src/platform/Windows.hpp src/platform/DB.hpp
-    src/platform/DBsqlite3.cpp src/platform/DBsqlite3.hpp
+    #src/platform/DBsqlite3.cpp src/platform/DBsqlite3.hpp
 )
 if(WIN32)
     set_property(SOURCE ${SRC_CRYPTO} PROPERTY COMPILE_FLAGS -Ot)

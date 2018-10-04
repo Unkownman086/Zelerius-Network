@@ -105,8 +105,8 @@ const uint32_t P2P_DEFAULT_INVOKE_TIMEOUT                = 60 * 2 * 1000;  // 2 
 const uint32_t P2P_DEFAULT_HANDSHAKE_INVOKE_TIMEOUT      = 5000;           // 5 seconds
 const char P2P_STAT_TRUSTED_PUBLIC_KEY[] = "b5a7e6891ced4744641db6b2b36d3e2d8dafd185b4d357acf05d7a2142dde4bc";
 
-const char *const CHECKPOINT_PUBLIC_KEYS[] = {};
-const char *const CHECKPOINT_PUBLIC_KEYS_TESTNET[] = {};
+const char *const CHECKPOINT_PUBLIC_KEYS[] = {"0"};
+const char *const CHECKPOINT_PUBLIC_KEYS_TESTNET[] = {"0"};
 
 const char *const SEED_NODES[] = {
     "82.223.50.28:48080", "82.223.22.92:48080", "82.223.50.28:58080"};

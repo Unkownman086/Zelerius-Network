@@ -105,7 +105,7 @@ public:
 		m_archive.read_archive(std::move(req), resp);
 	}
 
-    typedef std::array<Height, 0> CheckPointDifficulty;  // size must be == m_currency.get_checkpoint_keys_count()
+    typedef std::array<Height, 1> CheckPointDifficulty;  // size must be == m_currency.get_checkpoint_keys_count()
 protected:
 	CumulativeDifficulty get_tip_cumulative_difficulty() const { return m_tip_cumulative_difficulty; }
 
