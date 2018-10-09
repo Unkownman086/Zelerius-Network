@@ -560,5 +560,6 @@ bool UnspentSelector::select_optimal_outputs(HaveCoins *have_coins, DustCoins *d
 		}
 	}
 	optimize_amounts(have_coins, max_digit, total_amount);
-	return true;
+    //return true;
+    return m_used_total >= total_amount;
 }
