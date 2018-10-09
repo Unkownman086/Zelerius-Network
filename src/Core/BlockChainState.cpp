@@ -1271,16 +1271,32 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
 	}
 	std::set<uint32_t> tried_or_added;
 	crypto::random_engine<uint64_t> generator;
-	std::lognormal_distribution<double> distribution(1.9, 1.0);
+    std::lognormal_distribution<double> distribution(1.9, 1.0);  // Magic params here
+    const uint32_t linear_part = 150;                            // Magic params here
 	size_t attempts = 0;
     for (; result.size() < output_count && attempts < output_count * 20; ++attempts) {  // TODO - 20
 		//		uint32_t num = crypto::rand<uint32_t>();
 		//		num %= total_count;  // 0 handled in if above
-		double sample = distribution(generator);
+        /*double sample = distribution(generator);
 		int d_num     = static_cast<int>(std::floor(total_count * (1 - std::pow(10, -sample / 10))));
 		if (d_num < 0 || d_num >= int(total_count))
 			continue;
-		uint32_t num = static_cast<uint32_t>(d_num);
+        uint32_t num = static_cast<uint32_t>(d_num);*/
+
+        uint32_t num = 0;
+        if (result.size() % 2 == 0) {  // Half of outputs linear
+            if (total_count <= linear_part)
+                num = crypto::rand<uint32_t>() % total_count;  // 0 handled above
+            else
+                num = total_count - 1 - crypto::rand<uint32_t>() % linear_part;
+            } else {
+                double sample = distribution(generator);
+                int d_num     = static_cast<int>(std::floor(total_count * (1 - std::pow(10, -sample / 10))));
+                if (d_num < 0 || d_num >= int(total_count))
+                    continue;
+                    num = static_cast<uint32_t>(d_num);
+            }//else
+
 		if (!tried_or_added.insert(num).second)
 			continue;
 		api::Output item;

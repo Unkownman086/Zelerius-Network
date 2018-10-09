@@ -116,7 +116,7 @@ int main(int argc, const char *argv[]) try {
     platform::ExclusiveLock coin_lock(coin_folder, "zeleriusd.lock");
 
 	logging::LoggerManager log_manager;
-	log_manager.configure_default(config.get_data_folder("logs"), "bytecoind-");
+    log_manager.configure_default(config.get_data_folder("logs"), "zeleriusd-");
 
 	BlockChainState block_chain(log_manager, config, currency, false);
 	//	block_chain.test_undo_everything(0);

@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.5)
 project(zelerius)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 # message(STATUS "Bytecoind profile: According to cmake, sizeof(void *) == " ${CMAKE_SIZEOF_VOID_P})
 option(USE_INSTRUMENTATION "For testing - builds with address sanitizer instrument" OFF)
 option(WITH_THREAD_SANITIZER "For testing - builds with thread sanitizer instrument, USE_INSTRUMENTATION must be also set" OFF)
@@ -17,6 +17,22 @@ else()
     option(USE_SQLITE "Builds with sqlite instead of LMDB. 4x slower, but works on 32-bit and mobile platforms" ON)
     set(OPENSSL_ROOT ../openssl32)
 endif()
+
+if (MSVC)
+    set (CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS_MINSIZEREL} /MT")
+    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /MTd")
+    set (CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set (CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+
+    set (CMAKE_C_FLAGS_MINSIZEREL       "${CMAKE_C_FLAGS_MINSIZEREL} /MT")
+    set (CMAKE_C_FLAGS_RELWITHDEBINFO   "${CMAKE_C_FLAGS_RELWITHDEBINFO} /MTd")
+    set (CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE} /MT")
+    set (CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG} /MTd")
+    message(STATUS "MSVC usage: ON")
+  #else()
+  #  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+endif()
+
 if(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -62,7 +78,7 @@ else()
 endif()
 file(GLOB SRC_CRYPTO
     src/crypto/*.cpp src/crypto/*.hpp src/crypto/*.h
-    src/crypto/*.c src/crypto/*.h src/crypto/*.inl
+    src/crypto/*.c src/crypto/*.h
     src/crypto/bernstein/*.h src/crypto/bernstein/*.c
     src/crypto/blake/*.h src/crypto/blake/*.c
     src/crypto/groestl/*.h src/crypto/groestl/*.c

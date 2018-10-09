@@ -287,7 +287,7 @@ int main(int argc, const char *argv[]) try {
 	std::unique_ptr<Node> node;
 
 	logging::LoggerManager logManagerNode;
-	logManagerNode.configure_default(config.get_data_folder("logs"), "bytecoind-");
+    logManagerNode.configure_default(config.get_data_folder("logs"), "zeleriusd-");
 
 	std::promise<void> prm;
 	std::thread bytecoind_thread;
