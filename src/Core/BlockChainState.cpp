@@ -1275,14 +1275,6 @@ std::vector<api::Output> BlockChainState::get_random_outputs(
     const uint32_t linear_part = 150;                            // Magic params here
 	size_t attempts = 0;
     for (; result.size() < output_count && attempts < output_count * 20; ++attempts) {  // TODO - 20
-		//		uint32_t num = crypto::rand<uint32_t>();
-		//		num %= total_count;  // 0 handled in if above
-        /*double sample = distribution(generator);
-		int d_num     = static_cast<int>(std::floor(total_count * (1 - std::pow(10, -sample / 10))));
-		if (d_num < 0 || d_num >= int(total_count))
-			continue;
-        uint32_t num = static_cast<uint32_t>(d_num);*/
-
         uint32_t num = 0;
         if (result.size() % 2 == 0) {  // Half of outputs linear
             if (total_count <= linear_part)
@@ -1378,7 +1370,7 @@ uint32_t BlockChainState::next_global_index_for_amount(Amount amount) const {
 		return it->second;
 	std::string prefix = AMOUNT_OUTPUT_PREFIX + common::write_varint_sqlite4(amount);
 	DB::Cursor cur2    = m_db.rbegin(prefix);
-	uint32_t alt_in = cur2.end() ? 0 : boost::lexical_cast<Height>(common::read_varint_sqlite4(cur2.get_suffix())) + 1;
+    uint32_t alt_in = cur2.end() ? 0 : common::integer_cast<Height>(common::read_varint_sqlite4(cur2.get_suffix())) + 1;
 	m_next_gi_for_amount[amount] = alt_in;
 	return alt_in;
 }

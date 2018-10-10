@@ -10,6 +10,10 @@ Contents
 * Building on Windows
 * Building on other platforms
 
+## IMPORTANT
+
+**Development branch** is used for active development and can be either unstable or incompatible with release software so, **DO NOT USE IT!**
+
 ## Building on Linux 64-bit
 
 All commands below are adapted for Ubuntu, other distributions may need an other command set.

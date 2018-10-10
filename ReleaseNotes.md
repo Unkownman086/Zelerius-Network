@@ -1,5 +1,12 @@
 ## Release Notes
 
+### v1.2.1 [ development ]
+
+- Fixed bug when an invalid transaction may persist in the payment queue.
+- Add Math & exception files.
+- Use common::integer_cast instead of boost::lexical_cast
+
+
 ### v1.2.0
 
 - A Scheduled Network Upgrade is Planned for October 6.
