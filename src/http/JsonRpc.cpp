@@ -29,6 +29,13 @@ std::string Error::get_message(int code) {
 
 Error::Error(int c, const std::string &msg) : code(c), message(msg) {}
 
+void Error::seria_data(seria::ISeria &s) {
+    s.begin_object();
+    seria_data_members(s);
+    s.end_object();
+}
+void Error::seria_data_members(seria::ISeria &s) {}
+
 void make_generic_error_reponse(common::JsonValue &resp, const std::string &what, int error_code) {
 	common::JsonValue error(common::JsonValue::OBJECT);
 

@@ -33,6 +33,9 @@ public:
 
 	int code;
 	std::string message;
+
+    virtual void seria_data(seria::ISeria &s);
+    virtual void seria_data_members(seria::ISeria &s);
 };
 }
 }
