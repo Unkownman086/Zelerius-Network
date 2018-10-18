@@ -13,6 +13,45 @@
 
 using namespace bytecoin;
 
+//=================================================================================================
+
+api::ErrorWrongHeight::ErrorWrongHeight(const std::string &msg, HeightOrDepth request_height, Height top_block_height)
+    : json_rpc::Error(INVALID_HEIGHT_OR_DEPTH,
+          msg + " request_height=" + common::to_string(request_height) + " top_block_height=" + common::to_string(
+                                                                                                    top_block_height))
+    , request_height(request_height)
+    , top_block_height(top_block_height) {}
+
+Height api::ErrorWrongHeight::fix_height_or_depth(
+    HeightOrDepth ha, Height tip_height, bool throw_on_too_big_height, bool throw_on_too_big_depth, Height max_depth) {
+    if (ha < 0) {
+        ha = static_cast<HeightOrDepth>(tip_height) + 1 + ha;
+        if (ha < 0) {
+            if (throw_on_too_big_depth)
+                throw ErrorWrongHeight("height_or_depth cannot be deeper than genesis block", ha, tip_height);
+            ha = 0;
+        }
+    }
+    if (max_depth != std::numeric_limits<Height>::max() && ha + max_depth < tip_height)
+        throw ErrorWrongHeight(
+            "height_or_depth cannot be deeper than " + common::to_string(max_depth) + " blocks from top block", ha,
+            tip_height);
+    if (ha > static_cast<HeightOrDepth>(tip_height)) {
+        if (throw_on_too_big_height)
+            throw ErrorWrongHeight("height_or_depth cannot exceed top block height", ha, tip_height);
+        return tip_height;
+    }
+    return static_cast<Height>(ha);
+}
+
+void api::ErrorWrongHeight::seria_data_members(seria::ISeria &s) {
+    seria_kv("request_height", request_height, s);
+    seria_kv("top_block_height", top_block_height, s);
+}
+
+
+//=================================================================================================
+
 Hash CheckPoint::get_message_hash() const { return get_object_hash(*this); }
 
 namespace seria {

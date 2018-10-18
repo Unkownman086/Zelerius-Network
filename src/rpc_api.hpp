@@ -165,6 +165,18 @@ enum return_code {
 	WALLETD_EXPORTKEYS_MORETHANONE = 212  // We can export keys only if wallet file contains exactly 1 spend keypair
 };
 
+struct ErrorWrongHeight : public json_rpc::Error {
+    HeightOrDepth request_height = 0;
+    Height top_block_height      = 0;
+    ErrorWrongHeight() {}
+    ErrorWrongHeight(const std::string &msg, HeightOrDepth request_height, Height top_block_height);
+    void seria_data_members(seria::ISeria &s) override;
+    enum { INVALID_HEIGHT_OR_DEPTH = -2 };
+    static Height fix_height_or_depth(api::HeightOrDepth ha, Height tip_height, bool throw_on_too_big_height,
+        bool throw_on_too_big_depth, Height max_depth = std::numeric_limits<Height>::max());
+};
+
+
 namespace walletd {
 
 inline std::string url() { return "/json_rpc"; }

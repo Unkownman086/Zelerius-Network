@@ -408,7 +408,7 @@ static const std::string robots_txt             = "User-agent: *\r\nDisallow: /"
 
 bool Node::on_api_http_request(http::Client *who, http::RequestData &&request, http::ResponseData &response) {
 	response.r.add_headers_nocache();
-    //response.r.headers.push_back({ "Access-Control-Allow-Origin", "*" });
+    response.r.headers.push_back({ "Access-Control-Allow-Origin", "*" });
 	if (request.r.uri == "/" || request.r.uri == "/index.html") {
 		response.r.headers.push_back({"Content-Type", "text/html; charset=UTF-8"});
 		response.r.status = 200;
@@ -506,7 +506,7 @@ std::unordered_map<std::string, Node::JSONRPCHandlerFunction> Node::m_jsonrpc_ha
     {api::bytecoind::GetRawTransaction::method(), json_rpc::make_member_method(&Node::on_get_raw_transaction3)},
     {api::bytecoind::SyncMemPool::method(), json_rpc::make_member_method(&Node::on_sync_mempool3)}};
 
-bool Node::on_get_random_outputs3(http::Client *, http::RequestData &&, json_rpc::Request &&,
+/*bool Node::on_get_random_outputs3(http::Client *, http::RequestData &&, json_rpc::Request &&,
     api::bytecoind::GetRandomOutputs::Request &&request, api::bytecoind::GetRandomOutputs::Response &response) {
 	if (request.confirmed_height_or_depth < 0)
 		request.confirmed_height_or_depth = std::max(
@@ -519,6 +519,20 @@ bool Node::on_get_random_outputs3(http::Client *, http::RequestData &&, json_rpc
 		outs.insert(outs.end(), random_outputs.begin(), random_outputs.end());
 	}
 	return true;
+}*/
+
+bool Node::on_get_random_outputs3(http::Client *, http::RequestData &&, json_rpc::Request &&,
+    api::bytecoind::GetRandomOutputs::Request &&request, api::bytecoind::GetRandomOutputs::Response &response) {
+    Height confirmed_height_or_depth = api::ErrorWrongHeight::fix_height_or_depth(
+        request.confirmed_height_or_depth, m_block_chain.get_tip_height(), true, false);
+    api::BlockHeader tip_header = m_block_chain.get_tip();
+    for (uint64_t amount : request.amounts) {
+        auto random_outputs = m_block_chain.get_random_outputs(
+            amount, request.outs_count, confirmed_height_or_depth, tip_header.timestamp);
+        auto &outs = response.outputs[amount];
+        outs.insert(outs.end(), random_outputs.begin(), random_outputs.end());
+    }
+    return true;
 }
 
 api::bytecoind::GetStatus::Response Node::create_status_response3() const {
@@ -712,8 +726,12 @@ bool Node::on_get_raw_transaction3(http::Client *, http::RequestData &&, json_rp
 		res.raw_transaction  = static_cast<TransactionPrefix>(tx);  // TODO - std::move?
 		res.transaction.hash = req.hash;
 		res.transaction.fee  = get_tx_fee(res.raw_transaction);  // 0 for coinbase
+
+        get_payment_id_from_tx_extra(res.raw_transaction.extra, res.transaction.payment_id);
+        //res.transaction.anonymity = static_cast<uint32_t>(res.raw_transaction.inputs.size() - 1);
+        //m_log(logging::INFO) << "PayID " << res.transaction.payment_id << std::endl;
 		return true;
-	}
+    }
 	return true;
 }
 

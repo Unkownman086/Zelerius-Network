@@ -1,10 +1,12 @@
 ## Release Notes
 
-### v1.2.1 [ development ]
+### v1.2.1
 
 - Fixed bug when an invalid transaction may persist in the payment queue.
 - Add Math & exception files.
 - Use common::integer_cast instead of boost::lexical_cast
+- Add payment_id on get_raw_transaction method
+- Support Access-Control-Allow-Origin *
 
 
 ### v1.2.0
