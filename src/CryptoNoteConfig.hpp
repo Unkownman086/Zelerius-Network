@@ -72,7 +72,8 @@ const uint32_t CRYPTONOTE_MEMPOOL_TX_LIVETIME = 60 * 60 * 24;  // seconds, one d
 const uint32_t UPGRADE_HEIGHT_V2 = 1;
 const uint32_t UPGRADE_HEIGHT_V3 = 2;
 const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
-const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces block size ( ~ 06/oct/2018 )
+const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces max block size ( ~ 06/oct/2018 )
+const uint32_t UPGRADE_HEIGHT_V6 = 218880; //CN Variant 2 ( ~ 30/nov/2018 )
 
 const char CRYPTONOTE_BLOCKS_FILENAME[]       = "blocks.bin";
 const char CRYPTONOTE_BLOCKINDEXES_FILENAME[] = "blockindexes.bin";

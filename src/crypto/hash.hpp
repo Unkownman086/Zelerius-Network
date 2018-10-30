@@ -28,26 +28,31 @@ public:
 	CryptoNightContext(const CryptoNightContext &) = delete;
 	void operator=(const CryptoNightContext &) = delete;
 
-	inline void cn_slow_hash(const void *src_data, size_t length, unsigned char *hash) {
+    /*inline void cn_slow_hash(const void *src_data, size_t length, unsigned char *hash) {
         crypto::cn_slow_hash(data, src_data, length, hash, 0);
-	}
-	inline Hash cn_slow_hash(const void *src_data, size_t length) {
-		Hash hash;
-        crypto::cn_slow_hash(data, src_data, length, hash.data, 0);
-		return hash;
-	}
+    }*/
 
-    inline void cn_slow_hash_v1(const void *src_data, size_t length, unsigned char *hash) {
+    inline void cn_slow_hash(const void *data, std::size_t length, Hash &hash, int variant = 0) {
+      crypto::cn_slow_hash(data, length, reinterpret_cast<unsigned char *>(&hash), variant, 0/*prehashed*/);
+    }
+
+    inline Hash cn_slow_hash(const void *src_data, size_t length, int variant = 0) {
+		Hash hash;
+        crypto::cn_slow_hash(src_data, length, reinterpret_cast<unsigned char *>(&hash), variant, 0/*prehashed*/);
+		return hash;
+    }
+
+    /*inline void cn_slow_hash_v1(const void *src_data, size_t length, unsigned char *hash) {
         crypto::cn_slow_hash(data, src_data, length, hash, 1);
     }
     inline Hash cn_slow_hash_v1(const void *src_data, size_t length) {
         Hash hash;
         crypto::cn_slow_hash(data, src_data, length, hash.data, 1);
         return hash;
-    }
+    }*/
 
 private:
-	void *data;
+    void *data;
 };
 
 inline Hash tree_hash(const Hash *hashes, size_t count) {

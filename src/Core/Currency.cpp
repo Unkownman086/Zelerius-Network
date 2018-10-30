@@ -82,6 +82,7 @@ Currency::Currency(bool is_testnet)
     , upgrade_height_v3(parameters::UPGRADE_HEIGHT_V3)
     , upgrade_height_v4(parameters::UPGRADE_HEIGHT_V4)
     , upgrade_height_v5(parameters::UPGRADE_HEIGHT_V5)
+    , upgrade_height_v6(parameters::UPGRADE_HEIGHT_V6)
     , current_transaction_version(CURRENT_TRANSACTION_VERSION)
     , genesis_coinbase_tx_hex(GENESIS_COINBASE_TX_HEX)
     {
@@ -170,7 +171,9 @@ uint8_t Currency::get_block_major_version_for_height(Height height) const {
         return 3;
     if (height > upgrade_height_v4 && height <= upgrade_height_v5)
         return 4;
-    return 5;
+    if (height > upgrade_height_v5 && height <= upgrade_height_v6)
+        return 5;
+    return 6;
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
@@ -579,6 +582,7 @@ bool Currency::check_proof_of_work(const Hash &long_block_hash,
     case 3:
     case 4:
     case 5:
+    case 6:
         return check_proof_of_work_v2(long_block_hash, block, current_difficulty);
 	}
 	//  logger(ERROR, BrightRed) << "Unknown block major version: " <<
@@ -599,43 +603,6 @@ Transaction Currency::generateGenesisTransaction() {
   AccountPublicAddress ac{};
   construct_miner_tx(1, 0, 0, 0, 0, 0, ac, &tx); // zero fee in genesis
   return tx;
-}
-
-Transaction Currency::generateGenesisTransaction(const std::vector<AccountPublicAddress>& targets) {
-   assert(!targets.empty());
-
-   Transaction tx;
-   tx.inputs.clear();
-   tx.outputs.clear();
-   tx.extra.clear();
-   tx.version = CURRENT_TRANSACTION_VERSION;
-   tx.unlock_time = mined_money_unlock_window;
-   KeyPair txkey = crypto::random_keypair();
-   add_transaction_public_key_to_extra(tx.extra, txkey.public_key);
-   CoinbaseInput in;
-   in.block_index = 0;
-   tx.inputs.push_back(in);
-   uint64_t block_reward = money_supply / 10;
-   uint64_t target_amount = block_reward / targets.size();
-   uint64_t first_target_amount = target_amount + block_reward % targets.size();
-   for (size_t i = 0; i < targets.size(); ++i) {
-       crypto::KeyDerivation derivation{};
-       crypto::PublicKey outEphemeralPubKey{};
-     bool r = crypto::generate_key_derivation(targets[i].view_public_key, txkey.secret_key, derivation);
-     assert(r == true);
-//      CHECK_AND_ASSERT_MES(r, false, "while creating outs: failed to generate_key_derivation(" << targets[i].viewPublicKey << ", " << txkey.sec << ")");
-     r = crypto::derive_public_key(derivation,i,targets[i].spend_public_key, outEphemeralPubKey);
-     assert(r == true);
-//     CHECK_AND_ASSERT_MES(r, false, "while creating outs: failed to derive_public_key(" << derivation << ", " << i << ", " << targets[i].spendPublicKey << ")");
-     KeyOutput tk;
-     tk.key = outEphemeralPubKey;
-     TransactionOutput out;
-     out.amount = (i == 0) ? first_target_amount : target_amount;
-     std::cout << "outs: " << std::to_string(out.amount) << std::endl;
-     out.target = tk;
-     tx.outputs.push_back(out);
-   }
-   return tx;
 }
 
 Hash bytecoin::get_transaction_inputs_hash(const TransactionPrefix &tx) {
@@ -706,7 +673,12 @@ Hash bytecoin::get_block_long_hash(const BlockTemplate &bh, crypto::CryptoNightC
     if (bh.major_version >= 4) {
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
-        return crypto_ctx.cn_slow_hash_v1(raw_hashing_block.data(), raw_hashing_block.size());
+        return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),1);
+    }
+    if (bh.major_version >= 5) {
+        auto serializer = make_parent_block_serializer(bh, true, true);
+        BinaryArray raw_hashing_block = seria::to_binary(serializer);
+        return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),2);
     }
     throw std::runtime_error("Unknown block major version.");
 }

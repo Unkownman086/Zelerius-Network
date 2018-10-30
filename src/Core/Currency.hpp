@@ -73,6 +73,7 @@ public:
 	Height upgrade_height_v3;
     Height upgrade_height_v4;
     Height upgrade_height_v5;
+    Height upgrade_height_v6;
 
 	uint8_t get_block_major_version_for_height(Height) const;
 	uint8_t get_block_minor_version_for_height(Height) const;
