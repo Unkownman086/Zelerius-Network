@@ -173,7 +173,7 @@ uint8_t Currency::get_block_major_version_for_height(Height height) const {
         return 4;
     if (height > upgrade_height_v5 && height <= upgrade_height_v6)
         return 5;
-    return 6;
+    return 6;//CN v2 (V8)
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
@@ -670,12 +670,12 @@ Hash bytecoin::get_block_long_hash(const BlockTemplate &bh, crypto::CryptoNightC
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size());
     }
-    if (bh.major_version >= 4) {
+    if (bh.major_version >= 4 && bh.major_version < 6) { //v6 == CNv2(V8) == UPGRADE_HEIGHT_V6; v5 == Reduce max block size UPGRADE_HEIGHT_V5
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),1);
     }
-    if (bh.major_version >= 5) {
+    if (bh.major_version >= 6) {
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),2);
