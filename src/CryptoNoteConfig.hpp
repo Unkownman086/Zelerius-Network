@@ -24,6 +24,7 @@ const uint32_t CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW    = 10;
 const uint32_t DIFFICULTY_TARGET = 30;// seconds
 const uint32_t BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW = 11;
 const uint32_t DIFFICULTY_WINDOW_LWMA2 = 60;
+const uint32_t DIFFICULTY_WINDOW_LWMA4 = DIFFICULTY_WINDOW_LWMA2;
 const uint32_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT = 6 * DIFFICULTY_TARGET;
 const uint64_t DIFFICULTY_LIMIT = 1000;// Min diff
 
@@ -69,11 +70,20 @@ constexpr uint32_t CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS(uint32_t difficult
 
 const uint32_t CRYPTONOTE_MEMPOOL_TX_LIVETIME = 60 * 60 * 24;  // seconds, one day
 
+//==========================================================================================
 const uint32_t UPGRADE_HEIGHT_V2 = 1;
 const uint32_t UPGRADE_HEIGHT_V3 = 2;
 const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces max block size ( ~ 06/oct/2018 )
 const uint32_t UPGRADE_HEIGHT_V6 = 218880; //CN Variant 2 ( ~ 30/nov/2018 )
+
+const uint8_t V1 = 1; //V1
+const uint8_t V2 = 2; //UPGRADE_HEIGHT_V2
+const uint8_t V3 = 3; //UPGRADE_HEIGHT_V3
+const uint8_t V4 = 4; //UPGRADE_HEIGHT_V4
+const uint8_t V5 = 5; //UPGRADE_HEIGHT_V5
+const uint8_t V6 = 6; //UPGRADE_HEIGHT_V6
+//==========================================================================================
 
 const char CRYPTONOTE_BLOCKS_FILENAME[]       = "blocks.bin";
 const char CRYPTONOTE_BLOCKINDEXES_FILENAME[] = "blockindexes.bin";
