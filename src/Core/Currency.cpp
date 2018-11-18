@@ -84,20 +84,29 @@ Currency::Currency(bool is_testnet)
     , upgrade_height_v4(parameters::UPGRADE_HEIGHT_V4)
     , upgrade_height_v5(parameters::UPGRADE_HEIGHT_V5)
     , upgrade_height_v6(parameters::UPGRADE_HEIGHT_V6)
+    , upgrade_height_v7(parameters::UPGRADE_HEIGHT_V7)
     , current_transaction_version(CURRENT_TRANSACTION_VERSION)
     , genesis_coinbase_tx_hex(GENESIS_COINBASE_TX_HEX)
+    , genesis_coinbase_tx_hex_test(GENESIS_COINBASE_TX_HEX_TEST)
     {
-	if (is_testnet) {
-		upgrade_height_v2 = 0;
-		upgrade_height_v3 = static_cast<Height>(-1);
-	}
-	// Hard code coinbase tx in genesis block, because through generating tx use
-	// random, but genesis should be always
-	// the same
-    //std::string genesis_coinbase_tx_hex = "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
-	BinaryArray miner_tx_blob;
 
-	bool r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
+    BinaryArray miner_tx_blob;
+    bool r;
+
+	if (is_testnet) {
+        genesis_coinbase_tx_hex = genesis_coinbase_tx_hex_test;
+
+        upgrade_height_v2 = parameters::UPGRADE_HEIGHT_V2_TEST;
+        //upgrade_height_v3 = static_cast<Height>(-1);
+        upgrade_height_v3 = parameters::UPGRADE_HEIGHT_V3_TEST;
+        upgrade_height_v4 = parameters::UPGRADE_HEIGHT_V4_TEST;
+        upgrade_height_v5 = parameters::UPGRADE_HEIGHT_V5_TEST;
+        upgrade_height_v6 = parameters::UPGRADE_HEIGHT_V6_TEST;
+        upgrade_height_v7 = parameters::UPGRADE_HEIGHT_V7_TEST;
+    }
+
+    r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
+
 	seria::from_binary(genesis_block_template.base_transaction, miner_tx_blob);
 
 	if (!r)
@@ -174,16 +183,17 @@ uint8_t Currency::get_block_major_version_for_height(Height height) const {
         return parameters::V4;
     if (height > upgrade_height_v5 && height <= upgrade_height_v6)
         return parameters::V5;
-    return parameters::V6;//CN v2 (V8)
+    if (height > upgrade_height_v6 && height <= upgrade_height_v7)
+        return parameters::V6;// CN v2 (V8)
+    return parameters::V7;// Testing
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
-	if (height <= upgrade_height_v2)
-		return 0;
-	if (height > upgrade_height_v2 && height <= upgrade_height_v3)
-		return 0;
-    if (height > upgrade_height_v3 && height <= upgrade_height_v4)
-        return 0;
+
+    if (height <= upgrade_height_v2)
+            return 0;
+    if (height > upgrade_height_v2 && height <= upgrade_height_v3)
+            return 0;
     return 2;  // Signal of checkpoints support
 }
 
@@ -469,11 +479,8 @@ bool Currency::parse_amount(size_t number_of_decimal_places, const std::string &
 
 Difficulty Currency::next_effective_difficulty(uint8_t block_major_version, std::vector<Timestamp> timestamps,
     std::vector<CumulativeDifficulty> cumulative_difficulties) const {
-    /*Difficulty difficulty = next_difficulty(&timestamps, &cumulative_difficulties);
-	if (difficulty != 0 && block_major_version >= 2 && difficulty < minimum_difficulty_from_v2)
-		difficulty = minimum_difficulty_from_v2;
-    return difficulty;*/
-    if(block_major_version < parameters::V6)
+
+    if(block_major_version < parameters::V7)
     {
         return next_difficultyLWMA2(timestamps,cumulative_difficulties);
     }else{
@@ -619,6 +626,11 @@ Difficulty Currency::next_difficultyLWMA4(std::vector<Timestamp> timestamps, std
    if ( next_D > 100000 ) {
     next_D = ((next_D+500)/1000)*1000 + std::min(static_cast<uint64_t>(999), (TS[N]-TS[N-10])/10);
    }
+
+   // Minimum limit
+   if (next_D < difficulty_limit)
+       next_D = difficulty_limit;
+
    return  next_D;
 }
 

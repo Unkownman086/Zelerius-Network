@@ -32,6 +32,7 @@ public:
 
 	std::string crypto_note_name;
 	UUID network_id;
+    UUID network_id_test;
 
 	uint16_t p2p_bind_port;
 	uint16_t p2p_external_port;

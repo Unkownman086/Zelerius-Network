@@ -70,12 +70,21 @@ constexpr uint32_t CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS(uint32_t difficult
 
 const uint32_t CRYPTONOTE_MEMPOOL_TX_LIVETIME = 60 * 60 * 24;  // seconds, one day
 
-//==========================================================================================
+//==================================MAIN NET================================================
 const uint32_t UPGRADE_HEIGHT_V2 = 1;
 const uint32_t UPGRADE_HEIGHT_V3 = 2;
 const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces max block size ( ~ 06/oct/2018 )
-const uint32_t UPGRADE_HEIGHT_V6 = 218880; //CN Variant 2 ( ~ 30/nov/2018 )
+const uint32_t UPGRADE_HEIGHT_V6 = 265000; //CN Variant 2 ( ~ 15/dec/2018 )
+const uint32_t UPGRADE_HEIGHT_V7 = static_cast<uint32_t>(-1); // Future hard fork
+
+//==================================TEST NET================================================
+const uint32_t UPGRADE_HEIGHT_V2_TEST = 1;
+const uint32_t UPGRADE_HEIGHT_V3_TEST = 2;
+const uint32_t UPGRADE_HEIGHT_V4_TEST = 3; // CN Variant 1
+const uint32_t UPGRADE_HEIGHT_V5_TEST = 4; // Reduces max block size
+const uint32_t UPGRADE_HEIGHT_V6_TEST = 5; // CN Variant 2
+const uint32_t UPGRADE_HEIGHT_V7_TEST = 6; // LWMA-4 (Testing)
 
 const uint8_t V1 = 1; //V1
 const uint8_t V2 = 2; //UPGRADE_HEIGHT_V2
@@ -83,6 +92,7 @@ const uint8_t V3 = 3; //UPGRADE_HEIGHT_V3
 const uint8_t V4 = 4; //UPGRADE_HEIGHT_V4
 const uint8_t V5 = 5; //UPGRADE_HEIGHT_V5
 const uint8_t V6 = 6; //UPGRADE_HEIGHT_V6
+const uint8_t V7 = 7; //UPGRADE_HEIGHT_V7
 //==========================================================================================
 
 const char CRYPTONOTE_BLOCKS_FILENAME[]       = "blocks.bin";
@@ -120,7 +130,7 @@ const char *const CHECKPOINT_PUBLIC_KEYS[] = {"0"};
 const char *const CHECKPOINT_PUBLIC_KEYS_TESTNET[] = {"0"};
 
 const char *const SEED_NODES[] = {
-    "82.223.50.28:48080", "82.223.22.92:48080", "82.223.50.28:58080"};
+    "82.223.50.28:58080", "82.223.22.92:48080", "82.223.50.28:48000", "82.223.22.92:58080"};
 
 struct CheckpointData {
 	uint32_t height;
@@ -135,13 +145,24 @@ constexpr const CheckpointData CHECKPOINTS[] = {
     {5,"aed9def8c13daa8db58409050f0301c4ba481727f02eb40b27044d6930db35f2"},
     {10000,"9bbfd234a099d821459a0803f0780968a1bedc8bf236a3bb0047bb4c87ad962e"},
     {19001,"534a1c4899c1f3154927beef315aea4a9c4de1a80def68f12f1ac07b1cf84188"},
-    {45740,"6b1be5e528a5d2e5c5bec56ac0bbc46312d8ef4e6f1b036298310323c1f3ef5f"}
+    {45740,"6b1be5e528a5d2e5c5bec56ac0bbc46312d8ef4e6f1b036298310323c1f3ef5f"},
+    {60000,"93845b0dc886776a66054d61c0a59369d8c5b3da521bcd3ecd4fd3aeec36e5f4"},
+    {100000,"d179abfbb7f8969c31bbf7c195b3c7a0aa2b0c8b0377342023f476b7d7e2f610"},
+    {150000,"70f0016d4514f8b29ca321e435c9656302722a8a75ebc2c44a1c453927c641ff"},
+    {180000,"8903dfd69bb134367812fffa94830f5aceda968415c46fdcfd3194b509569aac"},
+    {185678,"3253160316c2b58a53cd20437a24af0827b8577af63abcb5baa502f4a4be5622"}
 };
 
 const char GENESIS_COINBASE_TX_HEX[] =
         "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
 
+const char GENESIS_COINBASE_TX_HEX_TEST[] =
+        "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
+
 // ZELERIUSvxxxxxx1
 const UUID BYTECOIN_NETWORK{{0x5a, 0x45, 0x4c, 0x45, 0x52, 0x49, 0x55, 0x53, 0x76, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x31}};
+
+// ZELERIUStestvxx1
+const UUID BYTECOIN_NETWORK_TEST{{0x5a, 0x45, 0x4c, 0x45, 0x52, 0x49, 0x55, 0x53, 0x74, 0x65, 0x73, 0x74, 0x76, 0x78, 0x78, 0x31}};
 
 }  // CryptoNote

@@ -75,6 +75,7 @@ public:
     Height upgrade_height_v4;
     Height upgrade_height_v5;
     Height upgrade_height_v6;
+    Height upgrade_height_v7;
 
 	uint8_t get_block_major_version_for_height(Height) const;
 	uint8_t get_block_minor_version_for_height(Height) const;
@@ -82,6 +83,7 @@ public:
 	uint8_t current_transaction_version;
 
     std::string genesis_coinbase_tx_hex;
+    std::string genesis_coinbase_tx_hex_test;
 
 	size_t sw_checkpoint_count() const;
 	bool is_in_sw_checkpoint_zone(Height index) const;

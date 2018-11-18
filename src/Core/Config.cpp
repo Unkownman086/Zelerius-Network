@@ -39,9 +39,6 @@ static void parse_net(const std::string &str, bool* is_testnet, bool* is_stagene
 using namespace common;
 using namespace bytecoin;
 
-//const static UUID BYTECOIN_NETWORK{{0x5a, 0x45, 0x4c, 0x45, 0x52, 0x49, 0x55, 0x53, 0x76, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x31}};
-// ZELERIUSvxxxxxx1
-
 Config::Config(common::CommandLine &cmd)
     : is_testnet(false)
     , is_stagenet(false)
@@ -51,6 +48,7 @@ Config::Config(common::CommandLine &cmd)
     , block_indexes_file_name(parameters::CRYPTONOTE_BLOCKINDEXES_FILENAME)
     , crypto_note_name(CRYPTONOTE_NAME)
     , network_id(BYTECOIN_NETWORK)
+    , network_id_test(BYTECOIN_NETWORK_TEST)
     , p2p_bind_port(P2P_DEFAULT_PORT)
     , p2p_external_port(P2P_DEFAULT_PORT)
     , p2p_bind_ip("0.0.0.0")
@@ -75,7 +73,8 @@ Config::Config(common::CommandLine &cmd)
             parse_net(pa, &is_testnet, &is_stagenet);
 
 	if (is_testnet) {
-		network_id.data[0] += 1;
+        //network_id.data[0] += 1;
+        network_id = network_id_test;
 		p2p_bind_port += 1000;
 		p2p_external_port += 1000;
 		bytecoind_bind_port += 1000;

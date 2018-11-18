@@ -1,5 +1,16 @@
 ## Release Notes
 
+### v1.3.0
+
+- Updated for CN Variant 2 - height 265000 ~ 15/dec/2018
+  Approximately on the 15th of December (Block #265000) there will be a scheduled network upgrade on the Zelerius network. To be sufficiently prepared, a user, exchange or pool operator, should run daemon v1.3.0 or higher (walletd or zelriusd).
+
+  The scheduled network upgrade introduces one major change. The algorithm changes to CN Variant 2 from CN variant 1 in order to prevent application-specific integrated circuits. See -> https://medium.com/@zelerius/crytonight-variant-2-v8-for-zelerius-network-7ba97489e08e
+
+- Fix minor version from height - larger blocks than upgrade_height_v3 are minor version 2
+- Update Check points
+- Fix minor bugs
+
 ### v1.2.1
 
 - Fixed bug when an invalid transaction may persist in the payment queue.
@@ -7,7 +18,6 @@
 - Use common::integer_cast instead of boost::lexical_cast
 - Add payment_id on get_raw_transaction method
 - Support Access-Control-Allow-Origin *
-
 
 ### v1.2.0
 
