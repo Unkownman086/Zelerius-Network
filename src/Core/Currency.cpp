@@ -684,7 +684,8 @@ bool Currency::check_proof_of_work(const Hash &long_block_hash,
     case parameters::V3:
     case parameters::V4:
     case parameters::V5:
-    case parameters::V6:
+    case parameters::V6://CNv2
+    case parameters::V7://Testing
         return check_proof_of_work_v2(long_block_hash, block, current_difficulty);
 	}
 	//  logger(ERROR, BrightRed) << "Unknown block major version: " <<
