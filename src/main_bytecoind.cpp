@@ -16,7 +16,7 @@
 using namespace bytecoin;
 
 static const char USAGE[] =
-    R"(bytecoind )" bytecoin_VERSION_STRING R"(.
+    R"(zeleriusd )" bytecoin_VERSION_STRING R"(.
 
 Usage:
   zeleriusd [options]
@@ -26,7 +26,7 @@ Usage:
 Options:
   --p2p-bind-address=<ip:port>           IP and port for P2P network protocol [default: 0.0.0.0:48080].
   --p2p-external-port=<port>             External port for P2P network protocol, if port forwarding used with NAT [default: 48080].
-  --zeleriusd-bind-address=<ip:port>     IP and port for bytecoind RPC API [default: 127.0.0.1:48081].
+  --zeleriusd-bind-address=<ip:port>     IP and port for zeleriusd RPC API [default: 127.0.0.1:48081].
   --seed-node-address=<ip:port>          Specify list (one or more) of nodes to start connecting to.
   --priority-node-address=<ip:port>      Specify list (one or more) of nodes to connect to and attempt to keep the connection open.
   --exclusive-node-address=<ip:port>     Specify list (one or more) of nodes to connect to only. All other nodes including seed nodes will be ignored.
@@ -69,7 +69,7 @@ int main(int argc, const char *argv[]) try {
 
 	const std::string coin_folder = config.get_data_folder();
 	if (!export_blocks.empty() && !backup_blockchain.empty()) {
-		std::cout << "You can either export blocks or backup blockchain on one run of bytecoind" << std::endl;
+        std::cout << "You can either export blocks or backup blockchain on one run of zeleriusd" << std::endl;
 		return api::BYTECOIND_WRONG_ARGS;
 	}
 	if (!backup_blockchain.empty()) {

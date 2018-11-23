@@ -45,7 +45,7 @@ Options:
 Options for built-in zeleriusd (run when no --zeleriusd-remote-address specified):
   --p2p-bind-address=<ip:port>          IP and port for P2P network protocol [default: 0.0.0.0:48080].
   --p2p-external-port=<port>            External port for P2P network protocol, if port forwarding used with NAT [default: 48080].
-  --zeleriusd-bind-address=<ip:port>    IP and port for bytecoind RPC [default: 127.0.0.1:48081].
+  --zeleriusd-bind-address=<ip:port>    IP and port for zeleriusd RPC [default: 127.0.0.1:48081].
   --seed-node-address=<ip:port>         Specify list (one or more) of nodes to start connecting to.
   --priority-node-address=<ip:port>     Specify list (one or more) of nodes to connect to and attempt to keep the connection open.
   --exclusive-node-address=<ip:port>    Specify list (one or more) of nodes to connect to only. All other nodes including seed nodes will be ignored.)";

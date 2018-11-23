@@ -486,7 +486,7 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 		    wc.original_who->write(std::move(last_http_response));
 		},
 	    [=](const WaitingClient &wc, std::string err) mutable {
-		    m_log(logging::INFO) << "got error to get_random_outputs from bytecoind, " << err << std::endl;
+            m_log(logging::INFO) << "got error to get_random_outputs from zeleriusd, " << err << std::endl;
 		    http::ResponseData last_http_response = json_rpc::create_error_response(
 		        wc.original_request, json_rpc::Error(json_rpc::INTERNAL_ERROR, err), wc.original_jsonrpc_id);
 		    wc.original_who->write(std::move(last_http_response));
