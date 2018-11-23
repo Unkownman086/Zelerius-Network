@@ -14,6 +14,7 @@
 #include "crypto/hash-impl.h"
 #include "crypto/hash.hpp"
 
+
 using namespace std;
 
 static crypto::CryptoNightContext context;
@@ -32,7 +33,8 @@ static void hash_tree(const void *data, size_t length, unsigned char *hash) {
 
 static void slow_hash(const void *data, size_t length, unsigned char *hash) {
     //context.cn_slow_hash(data, length, hash);
-    context.cn_slow_hash_v1(data, length, hash);
+
+    context.cn_slow_hash(data, length, *reinterpret_cast<crypto::Hash *>(hash),1);
 }
 }
 

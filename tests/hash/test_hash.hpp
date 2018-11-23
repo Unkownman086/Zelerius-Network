@@ -4,5 +4,6 @@
 #pragma once
 
 #include <string>
+#include "crypto/types.hpp"
 
 void test_hashes(const std::string &test_vectors_folder);

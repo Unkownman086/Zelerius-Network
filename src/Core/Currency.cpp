@@ -70,6 +70,7 @@ Currency::Currency(bool is_testnet)
           parameters::DIFFICULTY_TARGET /
               platform::get_time_multiplier_for_tests()))  // multiplier can be != 1 only in testnet
     , difficulty_window_lwma2(parameters::DIFFICULTY_WINDOW_LWMA2)
+    , difficulty_window_lwma4(parameters::DIFFICULTY_WINDOW_LWMA4)
     , difficulty_limit(parameters::DIFFICULTY_LIMIT)
     , max_block_size_initial(parameters::MAX_BLOCK_SIZE_INITIAL)
     , max_block_size_initial_v5(parameters::MAX_BLOCK_SIZE_INITIAL_V5)
@@ -82,20 +83,30 @@ Currency::Currency(bool is_testnet)
     , upgrade_height_v3(parameters::UPGRADE_HEIGHT_V3)
     , upgrade_height_v4(parameters::UPGRADE_HEIGHT_V4)
     , upgrade_height_v5(parameters::UPGRADE_HEIGHT_V5)
+    , upgrade_height_v6(parameters::UPGRADE_HEIGHT_V6)
+    , upgrade_height_v7(parameters::UPGRADE_HEIGHT_V7)
     , current_transaction_version(CURRENT_TRANSACTION_VERSION)
     , genesis_coinbase_tx_hex(GENESIS_COINBASE_TX_HEX)
+    , genesis_coinbase_tx_hex_test(GENESIS_COINBASE_TX_HEX_TEST)
     {
-	if (is_testnet) {
-		upgrade_height_v2 = 0;
-		upgrade_height_v3 = static_cast<Height>(-1);
-	}
-	// Hard code coinbase tx in genesis block, because through generating tx use
-	// random, but genesis should be always
-	// the same
-    //std::string genesis_coinbase_tx_hex = "010a01ff0001ffffffffffff01029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017b1b0f3aa9a4a821b32c34291678ea36b8d1d601661a494c3a6cde36d7cdedc2";
-	BinaryArray miner_tx_blob;
 
-	bool r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
+    BinaryArray miner_tx_blob;
+    bool r;
+
+	if (is_testnet) {
+        genesis_coinbase_tx_hex = genesis_coinbase_tx_hex_test;
+
+        upgrade_height_v2 = parameters::UPGRADE_HEIGHT_V2_TEST;
+        //upgrade_height_v3 = static_cast<Height>(-1);
+        upgrade_height_v3 = parameters::UPGRADE_HEIGHT_V3_TEST;
+        upgrade_height_v4 = parameters::UPGRADE_HEIGHT_V4_TEST;
+        upgrade_height_v5 = parameters::UPGRADE_HEIGHT_V5_TEST;
+        upgrade_height_v6 = parameters::UPGRADE_HEIGHT_V6_TEST;
+        upgrade_height_v7 = parameters::UPGRADE_HEIGHT_V7_TEST;
+    }
+
+    r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
+
 	seria::from_binary(genesis_block_template.base_transaction, miner_tx_blob);
 
 	if (!r)
@@ -163,34 +174,37 @@ uint32_t Currency::get_checkpoint_keys_count() const {
 
 uint8_t Currency::get_block_major_version_for_height(Height height) const {
     if (height <= upgrade_height_v2)
-        return 1;
+        return parameters::V1;
     if (height > upgrade_height_v2 && height <= upgrade_height_v3)
-        return 2;
+        return parameters::V2;
     if (height > upgrade_height_v3 && height <= upgrade_height_v4)
-        return 3;
+        return parameters::V3;
     if (height > upgrade_height_v4 && height <= upgrade_height_v5)
-        return 4;
-    return 5;
+        return parameters::V4;
+    if (height > upgrade_height_v5 && height <= upgrade_height_v6)
+        return parameters::V5;
+    if (height > upgrade_height_v6 && height <= upgrade_height_v7)
+        return parameters::V6;// CN v2 (V8)
+    return parameters::V7;// Testing
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
-	if (height <= upgrade_height_v2)
-		return 0;
-	if (height > upgrade_height_v2 && height <= upgrade_height_v3)
-		return 0;
-    if (height > upgrade_height_v3 && height <= upgrade_height_v4)
-        return 0;
+
+    if (height <= upgrade_height_v2)
+            return 0;
+    if (height > upgrade_height_v2 && height <= upgrade_height_v3)
+            return 0;
     return 2;  // Signal of checkpoints support
 }
 
 uint32_t Currency::block_granted_full_reward_zone_by_block_version(uint8_t block_major_version) const {
-    if (block_major_version >= 5)
+    if (block_major_version >= parameters::V5)
         return bytecoin::parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5;
-    if (block_major_version >= 4)
+    if (block_major_version >= parameters::V4)
         return block_granted_full_reward_zone;
-	if (block_major_version >= 3)
+    if (block_major_version >= parameters::V3)
 		return block_granted_full_reward_zone;
-	if (block_major_version == 2)
+    if (block_major_version == parameters::V2)
 		return bytecoin::parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2;
 	return bytecoin::parameters::CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1;
 }
@@ -208,8 +222,7 @@ bool Currency::get_block_reward(uint8_t block_major_version, size_t effective_me
     }
 
 	Amount penalized_base_reward = get_penalized_amount(base_reward, effective_median_size, current_block_size);
-	Amount penalized_fee =
-	    block_major_version >= 2 ? get_penalized_amount(fee, effective_median_size, current_block_size) : fee;
+    Amount penalized_fee = block_major_version >= parameters::V2 ? get_penalized_amount(fee, effective_median_size, current_block_size) : fee;
 
 	*emission_change = penalized_base_reward - (fee - penalized_fee);
 	*reward          = penalized_base_reward + penalized_fee;
@@ -226,7 +239,7 @@ uint32_t Currency::max_block_cumulative_size(Height height) const {
 
     uint64_t max_size = 0;
 
-    if(get_block_major_version_for_height(height)<5)
+    if(get_block_major_version_for_height(height)<parameters::V5)
     {
         max_size = static_cast<uint64_t>(max_block_size_initial + (height * max_block_size_growth_speed_numerator) / max_block_size_growth_speed_denominator);
         assert(max_size >= max_block_size_initial);
@@ -466,11 +479,13 @@ bool Currency::parse_amount(size_t number_of_decimal_places, const std::string &
 
 Difficulty Currency::next_effective_difficulty(uint8_t block_major_version, std::vector<Timestamp> timestamps,
     std::vector<CumulativeDifficulty> cumulative_difficulties) const {
-    /*Difficulty difficulty = next_difficulty(&timestamps, &cumulative_difficulties);
-	if (difficulty != 0 && block_major_version >= 2 && difficulty < minimum_difficulty_from_v2)
-		difficulty = minimum_difficulty_from_v2;
-    return difficulty;*/
-    return next_difficultyLWMA2(timestamps,cumulative_difficulties);
+
+    if(block_major_version < parameters::V7)
+    {
+        return next_difficultyLWMA2(timestamps,cumulative_difficulties);
+    }else{
+        return next_difficultyLWMA4(timestamps,cumulative_difficulties);
+    }
 }
 
 // LWMA-2 difficulty algorithm
@@ -484,8 +499,7 @@ Difficulty Currency::next_difficultyLWMA2(std::vector<Timestamp> timestamps, std
     int64_t L(0), ST, sum_3_ST(0), next_D, prev_D;
 
     // Make sure timestamps & CD vectors are not bigger than they are supposed to be.
-    assert(timestamps.size() == cumulative_difficulties.size() &&
-           timestamps.size() <= static_cast<uint64_t>(N+1) );
+    assert(timestamps.size() == cumulative_difficulties.size() && timestamps.size() <= static_cast<uint64_t>(N+1) );
 
     if (timestamps.size() <= 3 ){
         return difficulty_limit;
@@ -531,10 +545,101 @@ Difficulty Currency::next_difficultyLWMA2(std::vector<Timestamp> timestamps, std
     return static_cast<uint64_t>(next_D);
 }
 
+
+// LWMA-4 difficulty algorithm
+// Copyright (c) 2017-2018 Zawy, MIT License
+// https://github.com/zawy12/difficulty-algorithms/issues/3
+// See commented version for explanations & required config file changes. Fix FTL and MTP!
+
+/*difficulty_type next_difficulty_v3(std::vector<uint64_t> timestamps,
+   std::vector<difficulty_type> cumulative_difficulties) {*/
+Difficulty Currency::next_difficultyLWMA4(std::vector<Timestamp> timestamps, std::vector<CumulativeDifficulty> cumulative_difficulties) const
+{
+   uint64_t  T = difficulty_target;
+   uint64_t  N = difficulty_window_lwma4 - 1;
+   uint64_t  L(0), ST(0), next_D, prev_D, avg_D, i;
+
+   assert(timestamps.size() == cumulative_difficulties.size() && timestamps.size() <= static_cast<uint64_t>(N+1) );
+
+   if (timestamps.size() <= 3 ){
+       return difficulty_limit;
+   }
+   // Use "if" instead of "else if" in case vectors are incorrectly N all the time instead of N+1.
+   if ( timestamps.size() < static_cast<uint64_t>(N +1) ) {
+       N = static_cast<uint64_t>(timestamps.size()-1);
+   }
+
+   // If hashrate/difficulty ratio after a fork is < 1/3 prior ratio, hardcode D for N+1 blocks after fork.
+   // difficulty_guess = 100000; //  Dev may change.  Guess low than anything expected.
+   // if ( height <= UPGRADE_HEIGHT + 1 + N ) { return difficulty_guess;  }
+
+   // Safely convert out-of-sequence timestamps into > 0 solvetimes.
+   std::vector<uint64_t>TS(N+1);
+   TS[0] = timestamps[0];
+   for ( i = 1; i <= N; i++) {
+      if ( timestamps[i]  > TS[i-1]  ) {   TS[i] = timestamps[i];  }
+      else {  TS[i] = TS[i-1];   }
+   }
+
+   for ( i = 1; i <= N; i++) {
+      // Ignore long solvetimes if they were preceeded by 3 or 6 fast solves.
+      if ( i > 4 && TS[i]-TS[i-1] > 4*T  && TS[i-1] - TS[i-4] < (16*T)/10 ) {   ST = 2*T; }
+      else if ( i > 7 && TS[i]-TS[i-1] > 4*T  && TS[i-1] - TS[i-7] < 4*T ) {   ST = 2*T; }
+      else { // Assume normal conditions, so get ST.
+         // LWMA drops too much from long ST, so limit drops with a 5*T limit
+         ST = std::min(5*T ,TS[i] - TS[i-1]);
+      }
+      L +=  ST * i ;
+   }
+   if (L < N*N*T/20 ) { L =  N*N*T/20; }
+
+   CumulativeDifficulty aD = (cumulative_difficulties[N] - cumulative_difficulties[0]);
+
+   avg_D = ( aD.lo )/ N;
+
+   // Prevent round off error for small D and overflow for large D.
+   if (avg_D > 2000000*N*N*T) {
+       next_D = (avg_D/(200*L))*(N*(N+1)*T*97);
+   }
+   else {    next_D = (avg_D*N*(N+1)*T*97)/(200*L);    }
+
+   CumulativeDifficulty pD = (cumulative_difficulties[N] - cumulative_difficulties[N-1]);
+   prev_D = pD.lo;
+
+   if(aD.hi!=0 || pD.hi!=0)
+       return 0;//DIFFICULTY_OVERHEAD
+
+   // Apply 10% jump rule.
+   if (  ( TS[N] - TS[N-1] < (2*T)/10 ) ||
+         ( TS[N] - TS[N-2] < (5*T)/10 ) ||
+         ( TS[N] - TS[N-3] < (8*T)/10 )    )
+   {
+       next_D = std::max( next_D, std::min( (prev_D*110)/100, (105*avg_D)/100 ) );
+   }
+   // Make all insignificant digits zero for easy reading.
+   i = 1000000000;
+   while (i > 1) {
+     if ( next_D > i*100 ) { next_D = ((next_D+i/2)/i)*i; break; }
+     else { i /= 10; }
+   }
+   // Make least 3 digits equal avg of past 10 solvetimes.
+   if ( next_D > 100000 ) {
+    next_D = ((next_D+500)/1000)*1000 + std::min(static_cast<uint64_t>(999), (TS[N]-TS[N-10])/10);
+   }
+
+   // Minimum limit
+   if (next_D < difficulty_limit)
+       next_D = difficulty_limit;
+
+   return  next_D;
+}
+
+
+
 bool Currency::check_proof_of_work_v1(const Hash &long_block_hash,
     const BlockTemplate &block,
     Difficulty current_difficulty) const {
-	if (block.major_version != 1) {
+    if (block.major_version != parameters::V1) {
 		return false;
 	}
 	return check_hash(long_block_hash, current_difficulty);
@@ -543,7 +648,7 @@ bool Currency::check_proof_of_work_v1(const Hash &long_block_hash,
 bool Currency::check_proof_of_work_v2(const Hash &long_block_hash,
     const BlockTemplate &block,
     Difficulty current_difficulty) const {
-	if (block.major_version < 2) {
+    if (block.major_version < parameters::V2) {
 		return false;
 	}
 	TransactionExtraMergeMiningTag mm_tag;
@@ -573,12 +678,14 @@ bool Currency::check_proof_of_work(const Hash &long_block_hash,
     const BlockTemplate &block,
     Difficulty current_difficulty) const {
 	switch (block.major_version) {
-	case 1:
+    case parameters::V1:
 		return check_proof_of_work_v1(long_block_hash, block, current_difficulty);
-	case 2:
-    case 3:
-    case 4:
-    case 5:
+    case parameters::V2:
+    case parameters::V3:
+    case parameters::V4:
+    case parameters::V5:
+    case parameters::V6://CNv2
+    case parameters::V7://Testing
         return check_proof_of_work_v2(long_block_hash, block, current_difficulty);
 	}
 	//  logger(ERROR, BrightRed) << "Unknown block major version: " <<
@@ -599,43 +706,6 @@ Transaction Currency::generateGenesisTransaction() {
   AccountPublicAddress ac{};
   construct_miner_tx(1, 0, 0, 0, 0, 0, ac, &tx); // zero fee in genesis
   return tx;
-}
-
-Transaction Currency::generateGenesisTransaction(const std::vector<AccountPublicAddress>& targets) {
-   assert(!targets.empty());
-
-   Transaction tx;
-   tx.inputs.clear();
-   tx.outputs.clear();
-   tx.extra.clear();
-   tx.version = CURRENT_TRANSACTION_VERSION;
-   tx.unlock_time = mined_money_unlock_window;
-   KeyPair txkey = crypto::random_keypair();
-   add_transaction_public_key_to_extra(tx.extra, txkey.public_key);
-   CoinbaseInput in;
-   in.block_index = 0;
-   tx.inputs.push_back(in);
-   uint64_t block_reward = money_supply / 10;
-   uint64_t target_amount = block_reward / targets.size();
-   uint64_t first_target_amount = target_amount + block_reward % targets.size();
-   for (size_t i = 0; i < targets.size(); ++i) {
-       crypto::KeyDerivation derivation{};
-       crypto::PublicKey outEphemeralPubKey{};
-     bool r = crypto::generate_key_derivation(targets[i].view_public_key, txkey.secret_key, derivation);
-     assert(r == true);
-//      CHECK_AND_ASSERT_MES(r, false, "while creating outs: failed to generate_key_derivation(" << targets[i].viewPublicKey << ", " << txkey.sec << ")");
-     r = crypto::derive_public_key(derivation,i,targets[i].spend_public_key, outEphemeralPubKey);
-     assert(r == true);
-//     CHECK_AND_ASSERT_MES(r, false, "while creating outs: failed to derive_public_key(" << derivation << ", " << i << ", " << targets[i].spendPublicKey << ")");
-     KeyOutput tk;
-     tk.key = outEphemeralPubKey;
-     TransactionOutput out;
-     out.amount = (i == 0) ? first_target_amount : target_amount;
-     std::cout << "outs: " << std::to_string(out.amount) << std::endl;
-     out.target = tk;
-     tx.outputs.push_back(out);
-   }
-   return tx;
 }
 
 Hash bytecoin::get_transaction_inputs_hash(const TransactionPrefix &tx) {
@@ -680,7 +750,7 @@ static BinaryArray get_block_hashing_binary_array(const BlockTemplate &bh) {
 Hash bytecoin::get_block_hash(const BlockTemplate &bh) {
 	BinaryArray ba2 = get_block_hashing_binary_array(bh);
 
-	if (bh.major_version >= 2) {
+    if (bh.major_version >= parameters::V2) {
 		auto serializer        = make_parent_block_serializer(bh, true, false);
 		BinaryArray parent_ba2 = seria::to_binary(serializer);
 		append(ba2, parent_ba2.begin(), parent_ba2.end());
@@ -694,19 +764,24 @@ Hash bytecoin::get_auxiliary_block_header_hash(const BlockTemplate &bh) {
 }
 
 Hash bytecoin::get_block_long_hash(const BlockTemplate &bh, crypto::CryptoNightContext &crypto_ctx) {
-    if (bh.major_version == 1) {
+    if (bh.major_version == parameters::V1) {
         auto raw_hashing_block = get_block_hashing_binary_array(bh);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size());
     }
-    if (bh.major_version >= 2 && bh.major_version < 4) {
+    if (bh.major_version >= parameters::V2 && bh.major_version < parameters::V4) {
         auto serializer               = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size());
     }
-    if (bh.major_version >= 4) {
+    if (bh.major_version >= parameters::V4 && bh.major_version < parameters::V6) { //V6 == CNv2(V8) == UPGRADE_HEIGHT_V6; V5 == Reduce max block size UPGRADE_HEIGHT_V5
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
-        return crypto_ctx.cn_slow_hash_v1(raw_hashing_block.data(), raw_hashing_block.size());
+        return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),1);
+    }
+    if (bh.major_version >= parameters::V6) {
+        auto serializer = make_parent_block_serializer(bh, true, true);
+        BinaryArray raw_hashing_block = seria::to_binary(serializer);
+        return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),2);
     }
     throw std::runtime_error("Unknown block major version.");
 }
