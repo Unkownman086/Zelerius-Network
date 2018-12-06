@@ -364,6 +364,7 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 	const std::string optimization =
 	    request.transaction.unlock_time == 0 ? request.optimization : "minimal";  // Do not lock excess coins :)
 	Amount change = 0;
+    Amount receiver_fee = 0;
 	std::vector<api::Output> unspents;
 	Amount total_unspents = 0;
 	if (!request.spend_addresses.empty())
@@ -381,7 +382,7 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 	         .select_optimal_outputs(m_wallet_state.get_tip_height(), m_wallet_state.get_tip().timestamp,
 	             request.confirmed_height_or_depth, m_last_node_status.next_block_effective_median_size,
 	             request.transaction.anonymity, sum_positive_transfers, total_outputs, request.fee_per_byte,
-	             optimization, &change)
+                 optimization, &change, request.subtract_fee_from_amount ? &receiver_fee : nullptr)
 	         .empty()) {
 		// If selected outputs do not fit in next_block_effective_median_size, we try all outputs
 		unspents.clear();
@@ -397,7 +398,7 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 		std::string error = selector.select_optimal_outputs(m_wallet_state.get_tip_height(),
 		    m_wallet_state.get_tip().timestamp, request.confirmed_height_or_depth,
 		    m_last_node_status.next_block_effective_median_size, request.transaction.anonymity, sum_positive_transfers,
-		    total_outputs, request.fee_per_byte, optimization, &change);
+            total_outputs, request.fee_per_byte, optimization, &change, request.subtract_fee_from_amount ? &receiver_fee : nullptr);
 		if (error == "NOT_ENOUGH_FUNDS")
 			throw api::walletd::CreateTransaction::Error(api::walletd::CreateTransaction::NOT_ENOUGH_FUNDS,
 			    "Outputs cannot be selected for transaction " + error);
@@ -408,6 +409,32 @@ bool WalletNode::handle_create_transaction3(http::Client *who, http::RequestData
 		if (!error.empty())
 			throw json_rpc::Error(json_rpc::INVALID_PARAMS, "Outputs cannot be selected for transaction " + error);
 	}
+    if (receiver_fee != 0) {
+        // We should subtract fee in order of transfers, hence some code repetition from above
+        combined_outputs.clear();
+        history.clear();
+        for (const auto &tr : request.transaction.transfers) {
+            if (tr.amount <= 0)  // Not an output
+                throw json_rpc::Error(json_rpc::INVALID_PARAMS,
+                    "Negative transfer amount " + common::to_string(tr.amount) + " for address " + tr.address);
+            Amount am = static_cast<Amount>(tr.amount);
+            if (am <= receiver_fee) {
+                receiver_fee -= am;
+                continue;
+            }
+            am -= receiver_fee;
+            receiver_fee = 0;
+            AccountPublicAddress addr;
+            if (!m_wallet_state.get_currency().parse_account_address_string(tr.address, &addr))
+                throw api::ErrorAddress(
+                    api::ErrorAddress::ADDRESS_FAILED_TO_PARSE, "Failed to parse transfer address", tr.address);
+            combined_outputs[addr] += am;
+            history.insert(addr);  // TODO - check if unlinkable
+        }
+        if (combined_outputs.empty())
+            throw json_rpc::Error(
+                json_rpc::INVALID_PARAMS, "Sum of all transfers was less than fee - no transfers would be made");
+    }
 	// Selector ensures the change should be as "round" as possible
 	if (change > 0) {
 		combined_outputs[change_addr] += change;

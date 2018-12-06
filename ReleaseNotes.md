@@ -1,5 +1,9 @@
 ## Release Notes
 
+### v1.3.1
+
+- Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.
+
 ### v1.3.0
 
 - Updated for CN Variant 2 - height 265000 ~ 15/dec/2018

@@ -241,7 +241,7 @@ constexpr size_t TWO_THRESHOLD                   = 10;  // if any of 2 coin stac
 
 std::string UnspentSelector::select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
     size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
-    std::string optimization_level, Amount *change) {
+    std::string optimization_level, Amount *change, Amount *receiver_fee) {
 	effective_median_size = (120 * effective_median_size) / 100;  // Mining code uses 125/100
 
 	HaveCoins have_coins;
@@ -252,19 +252,20 @@ std::string UnspentSelector::select_optimal_outputs(Height block_height, Timesta
 	size_t optimizations = (optimization_level == "aggressive")
 	                           ? OPTIMIZATIONS_PER_TX_AGGRESSIVE
 	                           : (optimization_level == "minimal") ? 9 : OPTIMIZATIONS_PER_TX;
-	// 9 allows some dust optimization, but never "stack of coins" optimization.
-	// "Minimal" optimization does not mean no optimization
+    bool small_optimizations = true;
 	size_t optimization_median_percent =
 	    (optimization_level == "aggressive") ? MEDIAN_PERCENT_AGGRESSIVE : MEDIAN_PERCENT;
 	const size_t optimization_median = effective_median_size * optimization_median_percent / 100;
 	while (true) {
-		if (!select_optimal_outputs(&have_coins, &dust_coins, max_digits, total_amount + fee, anonymity, optimizations))
+        if (!select_optimal_outputs(&have_coins, &dust_coins, max_digits, total_amount + (receiver_fee ? 0 : fee), anonymity, optimizations, small_optimizations))
 			return "NOT_ENOUGH_FUNDS";
 		Amount change_dust_fee = (m_used_total - total_amount - fee) % m_currency.default_dust_threshold;
 		size_t tx_size         = get_maximum_tx_size(m_inputs_count, total_outputs + 8,
 		    anonymity);  // TODO - 8 is expected max change outputs
-		if (tx_size > optimization_median && optimizations > 0) {
+        if (tx_size > optimization_median && (optimizations > 0 || small_optimizations)) {
 			unoptimize_amounts(&have_coins, &dust_coins);
+            if (optimizations == 0)
+                small_optimizations = false;
 			optimizations /= 2;
 			if (optimizations < 10)
 				optimizations = 0;  // no point trying so many times for so few optimizations
@@ -430,7 +431,7 @@ void UnspentSelector::optimize_amounts(HaveCoins *have_coins, size_t max_digit, 
 }
 
 bool UnspentSelector::select_optimal_outputs(HaveCoins *have_coins, DustCoins *dust_coins, size_t max_digit,
-    Amount total_amount, size_t anonymity, size_t optimization_count) {
+    Amount total_amount, size_t anonymity, size_t optimization_count, bool small_optimizations) {
 	// Optimize for roundness of used_total - total_amount;
 	//    [digit:size:outputs]
 	m_log(logging::INFO) << "Optimizing amount=" << fake_large + total_amount - m_used_total
@@ -560,6 +561,7 @@ bool UnspentSelector::select_optimal_outputs(HaveCoins *have_coins, DustCoins *d
 		}
 	}
 	optimize_amounts(have_coins, max_digit, total_amount);
-    //return true;
+    if (small_optimizations)
+        optimize_amounts(have_coins, max_digit, total_amount);
     return m_used_total >= total_amount;
 }

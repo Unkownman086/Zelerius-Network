@@ -15,6 +15,9 @@ using namespace bytecoin;
 
 //=================================================================================================
 
+api::ErrorAddress::ErrorAddress(int c, const std::string &msg, const std::string &address)
+    : json_rpc::Error(c, msg + " address=" + address), address(address) {}
+
 api::ErrorWrongHeight::ErrorWrongHeight(const std::string &msg, HeightOrDepth request_height, Height top_block_height)
     : json_rpc::Error(INVALID_HEIGHT_OR_DEPTH,
           msg + " request_height=" + common::to_string(request_height) + " top_block_height=" + common::to_string(
@@ -48,6 +51,8 @@ void api::ErrorWrongHeight::seria_data_members(seria::ISeria &s) {
     seria_kv("request_height", request_height, s);
     seria_kv("top_block_height", top_block_height, s);
 }
+
+void api::ErrorAddress::seria_data_members(seria::ISeria &s) { seria_kv("address", address, s); }
 
 
 //=================================================================================================
@@ -423,6 +428,7 @@ void ser_members(api::walletd::CreateTransaction::Request &v, ISeria &s) {
 	seria_kv("fee_per_byte", v.fee_per_byte, s);
 	seria_kv("optimization", v.optimization, s);
 	seria_kv("save_history", v.save_history, s);
+    seria_kv("subtract_fee_from_amount", v.subtract_fee_from_amount, s);
 	seria_kv("prevent_conflict_with_transactions", v.prevent_conflict_with_transactions, s);
 }
 void ser_members(api::walletd::CreateTransaction::Response &v, ISeria &s) {

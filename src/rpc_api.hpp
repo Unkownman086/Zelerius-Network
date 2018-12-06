@@ -165,6 +165,15 @@ enum return_code {
 	WALLETD_EXPORTKEYS_MORETHANONE = 212  // We can export keys only if wallet file contains exactly 1 spend keypair
 };
 
+// Returned from many methods
+struct ErrorAddress : public json_rpc::Error {
+    std::string address;
+    ErrorAddress() {}
+    ErrorAddress(int c, const std::string &msg, const std::string &address);
+    void seria_data_members(seria::ISeria &s) override;
+    enum { ADDRESS_FAILED_TO_PARSE = -4, ADDRESS_NOT_IN_WALLET = -1002 };
+};
+
 struct ErrorWrongHeight : public json_rpc::Error {
     HeightOrDepth request_height = 0;
     Height top_block_height      = 0;
@@ -338,6 +347,8 @@ struct CreateTransaction {
 		bool save_history = true;  // If true, wallet will save encrypted transaction data (~100 bytes per used address)
 		                           // in <wallet_file>.history/. With this data it is possible to generate
 		                           // public-checkable proofs of sending funds to specific addresses.
+        bool subtract_fee_from_amount = false;
+        // If true, fee wil be subtracted from transfers in their respective order
 		std::vector<Hash> prevent_conflict_with_transactions;
 		// Experimental API for guaranteed payouts under any circumstances
 	};
