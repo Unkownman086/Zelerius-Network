@@ -196,8 +196,8 @@ void UnspentSelector::add_mixed_inputs(const SecretKey &view_secret_key,
 		auto &our_ra_outputs = ra_response.outputs[uu.amount];
 		while (mix_outputs.size() < anonymity + 1) {
 			if (our_ra_outputs.empty())
-				throw api::walletd::CreateTransaction::Error(api::walletd::CreateTransaction::NOT_ENOUGH_ANONYMITY,
-				    "Not enough anonymity for amount " + common::to_string(uu.amount));
+                throw json_rpc::Error(api::walletd::CreateTransaction::NOT_ENOUGH_ANONYMITY,
+                    "Requested anonymity too high for amount " + common::to_string(uu.amount));
 			mix_outputs.push_back(std::move(our_ra_outputs.back()));
 			our_ra_outputs.pop_back();
 		}
@@ -227,22 +227,22 @@ void UnspentSelector::add_mixed_inputs(const SecretKey &view_secret_key,
 	}
 }
 
-constexpr Amount fake_large = 1000000000000000000;  // optimize negative amounts
+constexpr Amount fake_large = 10000000000000000000ULL;  // optimize negative amounts
                                                     // by adding this large
                                                     // number to them
 constexpr size_t OPTIMIZATIONS_PER_TX            = 50;
 constexpr size_t OPTIMIZATIONS_PER_TX_AGGRESSIVE = 200;
-constexpr size_t MEDIAN_PERCENT                  = 12;  // make tx up to X% of block
-constexpr size_t MEDIAN_PERCENT_AGGRESSIVE       = 30;  // make tx up to X% of block
+constexpr size_t MEDIAN_PERCENT                  = 25;  // make tx up to X% of block
+constexpr size_t MEDIAN_PERCENT_AGGRESSIVE       = 50;  // make tx up to X% of block
 constexpr size_t STACK_OPTIMIZATION_THRESHOLD    = 20;  // If any coin stack is larger, we will spend 10 coins.
 constexpr size_t TWO_THRESHOLD                   = 10;  // if any of 2 coin stacks is larger, we
                                                         // will use 2 coins to cover single digit
                                                         // (e.g. 7 + 9 for 6)
 
-std::string UnspentSelector::select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
+void UnspentSelector::select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
     size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
     std::string optimization_level, Amount *change, Amount *receiver_fee) {
-	effective_median_size = (120 * effective_median_size) / 100;  // Mining code uses 125/100
+    effective_median_size = (120 * effective_median_size) / 100;  // Mining code uses 125/100
 
 	HaveCoins have_coins;
 	size_t max_digits;
@@ -256,12 +256,14 @@ std::string UnspentSelector::select_optimal_outputs(Height block_height, Timesta
 	size_t optimization_median_percent =
 	    (optimization_level == "aggressive") ? MEDIAN_PERCENT_AGGRESSIVE : MEDIAN_PERCENT;
 	const size_t optimization_median = effective_median_size * optimization_median_percent / 100;
+    const Amount dust_threshold      = m_currency.self_dust_threshold;
 	while (true) {
-        if (!select_optimal_outputs(&have_coins, &dust_coins, max_digits, total_amount + (receiver_fee ? 0 : fee), anonymity, optimizations, small_optimizations))
-			return "NOT_ENOUGH_FUNDS";
+        if (!select_optimal_outputs(&have_coins, &dust_coins, max_digits, total_amount + (receiver_fee ? 0 : fee),
+                anonymity, optimizations, small_optimizations))
+            throw json_rpc::Error(api::walletd::CreateTransaction::NOT_ENOUGH_FUNDS, "Not enough spendable funds");
 		Amount change_dust_fee = (m_used_total - total_amount - fee) % m_currency.default_dust_threshold;
-		size_t tx_size         = get_maximum_tx_size(m_inputs_count, total_outputs + 8,
-		    anonymity);  // TODO - 8 is expected max change outputs
+        size_t tx_size = get_maximum_tx_size(m_inputs_count, total_outputs + m_currency.get_max_amount_outputs(),
+            anonymity);  // Expected max change outputs
         if (tx_size > optimization_median && (optimizations > 0 || small_optimizations)) {
 			unoptimize_amounts(&have_coins, &dust_coins);
             if (optimizations == 0)
@@ -271,6 +273,12 @@ std::string UnspentSelector::select_optimal_outputs(Height block_height, Timesta
 				optimizations = 0;  // no point trying so many times for so few optimizations
 			continue;
 		}
+        if (fee_per_byte >
+            std::numeric_limits<Amount>::max() / tx_size / 2)  // *2 to take into account + dust_threshold :)
+            throw json_rpc::Error(json_rpc::INVALID_PARAMS,
+                "'fee_per_byte' is too large for transaction of size " + common::to_string(tx_size));
+
+        Amount size_fee = fee_per_byte * tx_size;
 
         unsigned long max_total_size      = (125 * effective_median_size) / 100;
         unsigned long max_cumulative_size = static_cast<unsigned long> (m_currency.max_block_cumulative_size(block_height));
@@ -287,23 +295,39 @@ std::string UnspentSelector::select_optimal_outputs(Height block_height, Timesta
                                   << " anonymity: " << anonymity
                                   << " effective_median_size: " << effective_median_size
                                   << " max_total_size = (125 * effective_median_size) / 100: " << max_total_size << std::endl;
-            return "TRANSACTION_DOES_NOT_FIT_IN_BLOCK";
+            //return "TRANSACTION_DOES_NOT_FIT_IN_BLOCK";
+
+            fee = ((size_fee + dust_threshold - 1) / dust_threshold) * dust_threshold;
+            unoptimize_amounts(&have_coins, &dust_coins);
+            auto ets = get_maximum_tx_size(0, total_outputs + 2 * m_currency.get_max_amount_outputs(), anonymity);
+            auto max_inputs_count = (effective_median_size - ets) / get_maximum_tx_input_size(anonymity);
+            select_max_outputs(&have_coins, &dust_coins, std::numeric_limits<Amount>::max(), anonymity, max_inputs_count);
+            auto total_anon = m_used_total - fee;
+            unoptimize_amounts(&have_coins, &dust_coins);
+            max_inputs_count = (effective_median_size - ets) / get_maximum_tx_input_size(0);
+            select_max_outputs(&have_coins, &dust_coins, std::numeric_limits<Amount>::max(), 0, max_inputs_count);
+            auto total_zero_anon = m_used_total - fee;
+            std::string msg = "Transaction with desired amount is too big. Max amount you can send with requested anonymity is " +
+                    m_currency.format_amount(total_anon);// + " (" + m_currency.format_amount(total_zero_anon) + " with zero anonymity)";
+            throw api::walletd::CreateTransaction::ErrorTransactionTooBig(msg, total_anon, total_zero_anon);
         }
-		Amount size_fee = fee_per_byte * tx_size;
-		if (fee + change_dust_fee >= size_fee) {
-			*change = m_used_total - total_amount - fee - change_dust_fee;
-			combine_optimized_unspents();
-			std::string final_coins;
-			for (const auto & uu : m_used_unspents)
-				final_coins += " " + common::to_string(uu.amount);
-			m_log(logging::INFO) << "Selected used_total=" << m_used_total << " for total_amount=" << total_amount
-			                     << ", final coins" << final_coins << std::endl;
-			return std::string();
-		}
-		fee =
-		    ((size_fee - change_dust_fee + m_currency.default_dust_threshold - 1) / m_currency.default_dust_threshold) *
-		    m_currency.default_dust_threshold;
-		unoptimize_amounts(&have_coins, &dust_coins);
+
+        if (fee + change_dust_fee >= size_fee) {
+            if (receiver_fee) {
+                *receiver_fee = fee;
+                *change       = m_used_total - total_amount - change_dust_fee;
+            } else
+                *change = m_used_total - total_amount - fee - change_dust_fee;
+            combine_optimized_unspents();
+            std::string final_coins;
+            for (const auto &uu : m_used_unspents)
+                final_coins += " " + common::to_string(uu.amount);
+            m_log(logging::INFO) << "Selected used_total=" << m_used_total << " for total_amount=" << total_amount
+                                 << ", final coins" << final_coins << std::endl;
+            return;
+        }
+        fee = ((size_fee - change_dust_fee + dust_threshold - 1) / dust_threshold) * dust_threshold;
+        unoptimize_amounts(&have_coins, &dust_coins);
 	}
 }
 
@@ -432,136 +456,140 @@ void UnspentSelector::optimize_amounts(HaveCoins *have_coins, size_t max_digit, 
 
 bool UnspentSelector::select_optimal_outputs(HaveCoins *have_coins, DustCoins *dust_coins, size_t max_digit,
     Amount total_amount, size_t anonymity, size_t optimization_count, bool small_optimizations) {
-	// Optimize for roundness of used_total - total_amount;
-	//    [digit:size:outputs]
-	m_log(logging::INFO) << "Optimizing amount=" << fake_large + total_amount - m_used_total
-	                     << " total_amount=" << total_amount << " used_total=" << m_used_total << std::endl;
-	if (anonymity == 0) {
-		if (m_used_total < total_amount) {
-			// Find smallest dust coin >= total_amount - used_total, it can be very
-			// large
-			auto duit = dust_coins->lower_bound(total_amount - m_used_total);
-			if (duit != dust_coins->end()) {
-				auto &un = duit->second.back();
-				m_log(logging::INFO) << "Found single large dust coin=" << un.amount << std::endl;
-				m_optimization_unspents.push_back(un);
-				m_used_total += un.amount;
-				m_inputs_count += 1;
-				duit->second.pop_back();
-				if (duit->second.empty())
-					dust_coins->erase(duit);
-			}
-		}
-		// Fill with dust coins, but no more than K coins.
-		while (m_used_total < total_amount && !dust_coins->empty() && optimization_count >= 1) {
-			auto duit = --dust_coins->end();
-			auto &un  = duit->second.back();
-			m_log(logging::INFO) << "Found optimization dust coin=" << un.amount << std::endl;
-			m_optimization_unspents.push_back(un);
-			m_used_total += un.amount;
-			m_inputs_count += 1;
-			optimization_count -= 1;
-			duit->second.pop_back();
-			if (duit->second.empty())
-				dust_coins->erase(duit);
-		}
-	}
-	// Add coins from large stacks, up to optimization_count
-	while (optimization_count >= 10) {
-		size_t best_weight                   = STACK_OPTIMIZATION_THRESHOLD;
-		std::vector<api::Output> *best_stack = nullptr;
-		for (auto &hit : *have_coins)
-			for (auto &ait : hit.second)
-				if (ait.second.size() > best_weight) {
-					best_weight = ait.second.size();
-					best_stack  = &ait.second;
-				}
-		if (!best_stack)
-			break;
-		for (int i = 0; i != 10; ++i) {
-			auto &un = best_stack->back();
-			m_log(logging::INFO) << "Found optimization stack for coin=" << un.amount << std::endl;
-			m_optimization_unspents.push_back(un);
-			m_used_total += un.amount;
-			m_inputs_count += 1;
-			optimization_count -= 1;
-			best_stack->pop_back();  // Will never become empty because of threshold
-		}
-	}
-	optimize_amounts(have_coins, max_digit, total_amount);
-	if (m_used_total >= total_amount)
-		return true;
-	// Find smallest coin >= total_amount - used_total
-	bool found          = false;
-	Amount digit_amount = 1;
-	for (size_t digit = 0; !found && digit != max_digit + 1; ++digit, digit_amount *= 10) {
-		auto dit = have_coins->find(digit);
-		if (dit == have_coins->end())  // No coins for digit
-			continue;
-		for (auto ait = dit->second.begin(); ait != dit->second.end(); ++ait)
-			if (!ait->second.empty() && ait->first * digit_amount >= total_amount - m_used_total) {
-				m_log(logging::INFO) << "Found single large coin for digit=" << digit << " coin=" << ait->first
-				                     << std::endl;
-				auto &uns = dit->second[ait->first];
-				auto &un  = uns.back();
-				m_optimization_unspents.push_back(un);
-				m_used_total += un.amount;
-				m_inputs_count += 1;
-				uns.pop_back();
-				if (uns.empty())
-					dit->second.erase(ait);
-				if (dit->second.empty())
-					have_coins->erase(dit);
-				found = true;
-				break;
-			}
-	}
-	if (m_used_total >= total_amount)
-		return true;
-	// Use largest coins (including dust if anonymity == 0) until amount satisfied
-	unoptimize_amounts(have_coins, dust_coins);
-	while (m_used_total < total_amount) {
-		if (have_coins->empty() && (anonymity != 0 || dust_coins->empty()))
-			return false;
-		Amount ha_amount = 0;
-		Amount du_amount = 0;
-		if (!have_coins->empty()) {
-			auto dit  = --have_coins->end();
-			auto ait  = --dit->second.end();
-			ha_amount = ait->second.back().amount;
-		}
-		if (anonymity == 0 && !dust_coins->empty()) {
-			auto duit = --dust_coins->end();
-			du_amount = duit->second.back().amount;
-		}
-		if (ha_amount > du_amount) {
-			auto dit  = --have_coins->end();
-			auto ait  = --dit->second.end();
-			auto &uns = ait->second;
-			auto &un  = uns.back();
-			m_log(logging::INFO) << "Found filler coin=" << un.amount << std::endl;
-			m_optimization_unspents.push_back(un);
-			m_used_total += un.amount;
-			m_inputs_count += 1;
-			uns.pop_back();
-			if (uns.empty())
-				dit->second.erase(ait);
-			if (dit->second.empty())
-				have_coins->erase(dit);
-		} else {
-			auto duit = --dust_coins->end();
-			auto &un  = duit->second.back();
-			m_log(logging::INFO) << "Found filler dust coin=" << un.amount << std::endl;
-			m_optimization_unspents.push_back(un);
-			m_used_total += un.amount;
-			m_inputs_count += 1;
-			duit->second.pop_back();
-			if (duit->second.empty())
-				dust_coins->erase(duit);
-		}
-	}
-	optimize_amounts(have_coins, max_digit, total_amount);
+    // Optimize for roundness of used_total - total_amount;
+    //    [digit:size:outputs]
+    m_log(logging::INFO) << "Optimizing amount=" << fake_large + total_amount - m_used_total
+                         << " total_amount=" << total_amount << " used_total=" << m_used_total << std::endl;
+    if (anonymity == 0) {
+        if (m_used_total < total_amount) {
+            // Find smallest dust coin >= total_amount - used_total, it can be very
+            // large
+            auto duit = dust_coins->lower_bound(total_amount - m_used_total);
+            if (duit != dust_coins->end()) {
+                auto &un = duit->second.back();
+                m_log(logging::INFO) << "Found single large dust coin=" << un.amount << std::endl;
+                m_optimization_unspents.push_back(un);
+                m_used_total += un.amount;
+                m_inputs_count += 1;
+                duit->second.pop_back();
+                if (duit->second.empty())
+                    dust_coins->erase(duit);
+            }
+        }
+        // Fill with dust coins, but no more than K coins.
+        while (m_used_total < total_amount && !dust_coins->empty() && optimization_count >= 1) {
+            auto duit = --dust_coins->end();
+            auto &un  = duit->second.back();
+            m_log(logging::INFO) << "Found optimization dust coin=" << un.amount << std::endl;
+            m_optimization_unspents.push_back(un);
+            m_used_total += un.amount;
+            m_inputs_count += 1;
+            optimization_count -= 1;
+            duit->second.pop_back();
+            if (duit->second.empty())
+                dust_coins->erase(duit);
+        }
+    }
+    // Add coins from large stacks, up to optimization_count
+    while (optimization_count >= 10) {
+        size_t best_weight                   = STACK_OPTIMIZATION_THRESHOLD;
+        std::vector<api::Output> *best_stack = nullptr;
+        for (auto &hit : *have_coins)
+            for (auto &ait : hit.second)
+                if (ait.second.size() > best_weight) {
+                    best_weight = ait.second.size();
+                    best_stack  = &ait.second;
+                }
+        if (!best_stack)
+            break;
+        for (int i = 0; i != 10; ++i) {
+            auto &un = best_stack->back();
+            m_log(logging::INFO) << "Found optimization stack for coin=" << un.amount << std::endl;
+            m_optimization_unspents.push_back(un);
+            m_used_total += un.amount;
+            m_inputs_count += 1;
+            optimization_count -= 1;
+            best_stack->pop_back();  // Will never become empty because of threshold
+        }
+    }
+    optimize_amounts(have_coins, max_digit, total_amount);
+    if (m_used_total >= total_amount)
+        return true;
+    // Find smallest coin >= total_amount - used_total
+    bool found          = false;
+    Amount digit_amount = 1;
+    for (size_t digit = 0; !found && digit != max_digit + 1; ++digit, digit_amount *= 10) {
+        auto dit = have_coins->find(digit);
+        if (dit == have_coins->end())  // No coins for digit
+            continue;
+        for (auto ait = dit->second.begin(); ait != dit->second.end(); ++ait)
+            if (!ait->second.empty() && ait->first * digit_amount >= total_amount - m_used_total) {
+                m_log(logging::INFO) << "Found single large coin for digit=" << digit << " coin=" << ait->first
+                                     << std::endl;
+                auto &uns = dit->second[ait->first];
+                auto &un  = uns.back();
+                m_optimization_unspents.push_back(un);
+                m_used_total += un.amount;
+                m_inputs_count += 1;
+                uns.pop_back();
+                if (uns.empty())
+                    dit->second.erase(ait);
+                if (dit->second.empty())
+                    have_coins->erase(dit);
+                found = true;
+                break;
+            }
+    }
+    if (m_used_total >= total_amount)
+        return true;
+    // Use largest coins (including dust if anonymity == 0) until amount satisfied
+    unoptimize_amounts(have_coins, dust_coins);
+    select_max_outputs(have_coins, dust_coins, total_amount, anonymity, std::numeric_limits<size_t>::max());
     if (small_optimizations)
         optimize_amounts(have_coins, max_digit, total_amount);
     return m_used_total >= total_amount;
+}
+
+void UnspentSelector::select_max_outputs(
+    HaveCoins *have_coins, DustCoins *dust_coins, Amount total_amount, size_t anonymity, size_t max_inputs_count) {
+    while (m_used_total < total_amount && m_inputs_count < max_inputs_count) {
+        if (have_coins->empty() && (anonymity != 0 || dust_coins->empty()))
+            return;
+        Amount ha_amount = 0;
+        Amount du_amount = 0;
+        if (!have_coins->empty()) {
+            auto dit  = --have_coins->end();
+            auto ait  = --dit->second.end();
+            ha_amount = ait->second.back().amount;
+        }
+        if (anonymity == 0 && !dust_coins->empty()) {
+            auto duit = --dust_coins->end();
+            du_amount = duit->second.back().amount;
+        }
+        if (ha_amount > du_amount) {
+            auto dit  = --have_coins->end();
+            auto ait  = --dit->second.end();
+            auto &uns = ait->second;
+            auto &un  = uns.back();
+            m_log(logging::INFO) << "Found filler coin=" << un.amount << std::endl;
+            m_optimization_unspents.push_back(un);
+            m_used_total += un.amount;
+            m_inputs_count += 1;
+            uns.pop_back();
+            if (uns.empty())
+                dit->second.erase(ait);
+            if (dit->second.empty())
+                have_coins->erase(dit);
+        } else {
+            auto duit = --dust_coins->end();
+            auto &un  = duit->second.back();
+            m_log(logging::INFO) << "Found filler dust coin=" << un.amount << std::endl;
+            m_optimization_unspents.push_back(un);
+            m_used_total += un.amount;
+            m_inputs_count += 1;
+            duit->second.pop_back();
+            if (duit->second.empty())
+                dust_coins->erase(duit);
+        }
+    }
 }

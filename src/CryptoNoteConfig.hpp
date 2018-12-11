@@ -61,6 +61,7 @@ const size_t CRYPTONOTE_DISPLAY_DECIMAL_POINT       = 12;
 //FEE & DUST
 const uint64_t MINIMUM_FEE                          = 1000000;  // pow(10, 6)
 const uint64_t DEFAULT_DUST_THRESHOLD               = 1000000;  // pow(10, 6)
+const uint64_t SELF_DUST_THRESHOLD                  = 1000;     // pow(10, 3)
 
 // After next hardfork remove settings below
 const uint32_t CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_BLOCKS = 1;

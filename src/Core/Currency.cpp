@@ -66,6 +66,7 @@ Currency::Currency(bool is_testnet)
     , number_of_decimal_places(parameters::CRYPTONOTE_DISPLAY_DECIMAL_POINT)
     , minimum_fee(parameters::MINIMUM_FEE)
     , default_dust_threshold(parameters::DEFAULT_DUST_THRESHOLD)
+    , self_dust_threshold(parameters::SELF_DUST_THRESHOLD)
     , difficulty_target(std::max<Timestamp>(1,
           parameters::DIFFICULTY_TARGET /
               platform::get_time_multiplier_for_tests()))  // multiplier can be != 1 only in testnet

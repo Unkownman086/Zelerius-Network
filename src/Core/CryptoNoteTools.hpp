@@ -24,6 +24,7 @@ void fix_merge_mining_tag(BlockTemplate &block);  // If solo mining, we must sti
 
 void decompose_amount(Amount amount, Amount dust_threshold, std::vector<Amount> *decomposed_amounts);
 size_t get_maximum_tx_size(size_t input_count, size_t output_count, size_t mixin_count);
+size_t get_maximum_tx_input_size(size_t anonymity);
 
 bool get_tx_fee(const TransactionPrefix &tx, uint64_t *fee);
 uint64_t get_tx_fee(const TransactionPrefix &tx);

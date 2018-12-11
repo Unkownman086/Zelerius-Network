@@ -52,8 +52,11 @@ public:
 	size_t number_of_decimal_places;
 	Amount coin() const { return DECIMAL_PLACES.at(number_of_decimal_places); }
 
+    size_t get_max_amount_outputs() const { return 14; }  // 2 groups of 3 digits + 12 single digits
+
 	Amount minimum_fee;
 	Amount default_dust_threshold;
+    Amount self_dust_threshold;
 
 	Timestamp difficulty_target;
     uint32_t difficulty_window_lwma2;

@@ -82,6 +82,8 @@ class UnspentSelector {
 	std::vector<Amount> m_ra_amounts;
     bool select_optimal_outputs(HaveCoins *have_coins, DustCoins *dust_coins, size_t max_digit, Amount amount,
         size_t anonymity, size_t optimization_count, bool small_optimizations);
+    void select_max_outputs(
+        HaveCoins *have_coins, DustCoins *dust_coins, Amount total_amount, size_t anonymity, size_t max_inputs_count);
 
 public:
 	explicit UnspentSelector(logging::ILogger &logger, const Currency &currency, Unspents &&unspents);
@@ -90,7 +92,7 @@ public:
 	    const std::unordered_map<PublicKey, WalletRecord> &wallet_records, TransactionBuilder *builder,
 	    uint32_t anonymity, api::bytecoind::GetRandomOutputs::Response &&ra_response);
 
-    std::string select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
+    void select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
         size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
         std::string optimization_level, Amount *change, Amount *receiver_fee);
 	Amount get_used_total() const { return m_used_total; }

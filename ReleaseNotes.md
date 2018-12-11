@@ -1,8 +1,9 @@
 ## Release Notes
 
-### v1.3.1
+### v1.3.1 [dev]
 
 - Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.
+- Added amounts to the message of the TRANSACTION_TOO_BIG error so that you see how much you can actually send (with desired or zero anonymity).
 
 ### v1.3.0
 

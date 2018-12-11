@@ -52,6 +52,15 @@ void api::ErrorWrongHeight::seria_data_members(seria::ISeria &s) {
     seria_kv("top_block_height", top_block_height, s);
 }
 
+api::walletd::CreateTransaction::ErrorTransactionTooBig::ErrorTransactionTooBig(
+    const std::string &msg, Amount a, Amount a_zero)
+    : json_rpc::Error(TRANSACTION_DOES_NOT_FIT_IN_BLOCK, msg), max_amount(a), max_zero_anonymity_amount(a_zero) {}
+
+void api::walletd::CreateTransaction::ErrorTransactionTooBig::seria_data_members(seria::ISeria &s) {
+    seria_kv("max_amount", max_amount, s);
+    seria_kv("max_zero_anonymity_amount", max_zero_anonymity_amount, s);
+}
+
 void api::ErrorAddress::seria_data_members(seria::ISeria &s) { seria_kv("address", address, s); }
 
 
