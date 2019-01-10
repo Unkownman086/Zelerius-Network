@@ -972,7 +972,7 @@ AddTransactionResult BlockChainState::add_transaction(const Hash &tid, const Tra
 		if (!m_memory_state_ki_tx.insert(std::make_pair(ki.first, tid)).second)
 			all_inserted = false;
 	}
-	if (!m_memory_state_tx.insert(std::make_pair(tid, PoolTransaction(tx, binary_tx, my_fee, 0)))
+    if (!m_memory_state_tx.insert(std::make_pair(tid, PoolTransaction(tx, binary_tx, my_fee, platform::now_unix_timestamp())))
 	         .second)  // TODO set timestamp
 		all_inserted = false;
 	if (!m_memory_state_fee_tx[my_fee_per_byte].insert(tid).second)
