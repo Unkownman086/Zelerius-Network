@@ -400,7 +400,7 @@ void BlockChainState::tip_changed() {
 }
 
 bool BlockChainState::create_mining_block_template(BlockTemplate *b, const AccountPublicAddress &adr,
-    const BinaryArray &extra_nonce, Difficulty *difficulty, Height *height) const {
+    const BinaryArray &extra_nonce, Difficulty *difficulty, Height *height) {
 	clear_mining_transactions();
 	*height = get_tip_height() + 1;
 
@@ -482,6 +482,10 @@ bool BlockChainState::create_mining_block_template(BlockTemplate *b, const Accou
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
                                   << "effective_size_median: " << effective_size_median << std::endl;
+
+            if(tx_size > block_size_limit)
+                remove_from_pool(tit->first);
+
 			continue;
         }
         else
@@ -592,7 +596,7 @@ bool BlockChainState::create_mining_block_template(BlockTemplate *b, const Accou
 }
 
 bool BlockChainState::create_mining_block_template2(BlockTemplate *b, const AccountPublicAddress &adr,
-    const BinaryArray &extra_nonce, Difficulty *difficulty, Hash parent_bid) const {
+    const BinaryArray &extra_nonce, Difficulty *difficulty, Hash parent_bid) {
 	uint32_t next_median_size       = 0;
 	Timestamp next_median_timestamp = 0;
 	const Hash bid                  = parent_bid;
@@ -684,6 +688,10 @@ bool BlockChainState::create_mining_block_template2(BlockTemplate *b, const Acco
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
                                   << "effective_size_median: " << effective_size_median << std::endl;
+
+            if(tx_size > block_size_limit)
+                remove_from_pool(tit->first);
+
 			continue;
         }else
         {

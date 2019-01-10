@@ -64,9 +64,9 @@ public:
 	const PoolTransMap &get_memory_state_transactions() const { return m_memory_state_tx; }
 
 	bool create_mining_block_template(
-	    BlockTemplate *, const AccountPublicAddress &, const BinaryArray &extra_nonce, Difficulty *, Height *) const;
+        BlockTemplate *, const AccountPublicAddress &, const BinaryArray &extra_nonce, Difficulty *, Height *);
 	bool create_mining_block_template2(
-	    BlockTemplate *, const AccountPublicAddress &, const BinaryArray &extra_nonce, Difficulty *, Hash) const;
+        BlockTemplate *, const AccountPublicAddress &, const BinaryArray &extra_nonce, Difficulty *, Hash);
 	BroadcastAction add_mined_block(const BinaryArray &raw_block_template, RawBlock *, api::BlockHeader *);
 
 	static api::BlockHeader fill_genesis(Hash genesis_bid, const BlockTemplate &);
@@ -131,7 +131,7 @@ private:
 	AddTransactionResult add_transaction(const Hash &tid, const Transaction &tx, const BinaryArray &binary_tx,
 	    Height unlock_height, Timestamp unlock_timestamp, Height *conflict_height, bool check_sigs,
 	    const std::string &source_address);
-	void remove_from_pool(Hash tid);
+    void remove_from_pool(Hash tid);
 
 	uint32_t m_tx_pool_version = 2;  // Incremented every time pool changes, reset to 2 on redo block. 2 is selected
 	                                 // because wallet resets to 1, so after both reset pool versions do not equal

@@ -4,6 +4,9 @@
 
 - Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.
 - Added amounts to the message of the TRANSACTION_TOO_BIG error so that you see how much you can actually send (with desired or zero anonymity).
+x Fixed bug when a big transaction persist in mempool
+x Add keccak from -> https://github.com/XKCP/XKCP
+x Add ban algorithm
 
 ### v1.3.0
 
