@@ -242,7 +242,7 @@ constexpr size_t TWO_THRESHOLD                   = 10;  // if any of 2 coin stac
 void UnspentSelector::select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
     size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
     std::string optimization_level, Amount *change, Amount *receiver_fee) {
-    effective_median_size = (120 * effective_median_size) / 100;  // Mining code uses 125/100
+    effective_median_size = (125 * effective_median_size) / 100;  // Mining code uses 125/100
 
 	HaveCoins have_coins;
 	size_t max_digits;
@@ -280,7 +280,7 @@ void UnspentSelector::select_optimal_outputs(Height block_height, Timestamp bloc
 
         Amount size_fee = fee_per_byte * tx_size;
 
-        unsigned long max_total_size      = (125 * effective_median_size) / 100;
+        unsigned long max_total_size      = effective_median_size; //(125 * effective_median_size) / 100;
         unsigned long max_cumulative_size = static_cast<unsigned long> (m_currency.max_block_cumulative_size(block_height));
         max_total_size           = std::min(max_total_size, max_cumulative_size) - m_currency.miner_tx_blob_reserved_size;
         const size_t block_size_limit = max_total_size;

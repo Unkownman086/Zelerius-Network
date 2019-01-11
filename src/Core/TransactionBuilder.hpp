@@ -42,8 +42,7 @@ public:
 	void set_extra_nonce(const BinaryArray &);
 
 	// before calling, make sure mix_outputs do not contain real_output...
-	size_t add_input(
-	    const AccountKeys &sender_keys, api::Output real_output, const std::vector<api::Output> &mix_outputs);
+	size_t add_input(const AccountKeys &sender_keys, api::Output real_output, const std::vector<api::Output> &mix_outputs);
 	size_t add_output(uint64_t amount, const AccountPublicAddress &to);
 
 	Amount get_outputs_amount() const { return m_outputs_amount; }
@@ -55,10 +54,9 @@ public:
 
 	static crypto::KeyPair deterministic_keys_from_seed(const Hash &tx_inputs_hash, const Hash &tx_derivation_seed);
 	static crypto::KeyPair deterministic_keys_from_seed(const TransactionPrefix &tx, const Hash &tx_derivation_seed);
-	static bool generate_key_image_helper(const AccountKeys &ack, const crypto::PublicKey &tx_public_key,
-	    size_t real_output_index, KeyPair &in_ephemeral, crypto::KeyImage &ki);
-	static bool derive_public_key(
-	    const AccountPublicAddress &to, const SecretKey &tx_key, size_t output_index, PublicKey &ephemeral_key);
+    static bool generate_key_image_helper(const AccountKeys &ack, const crypto::PublicKey &tx_public_key,
+                                          size_t real_output_index, KeyPair &in_ephemeral, crypto::KeyImage &ki);
+    static bool derive_public_key(const AccountPublicAddress &to, const SecretKey &tx_key, size_t output_index,PublicKey &ephemeral_key);
 	static std::vector<uint32_t> absolute_output_offsets_to_relative(const std::vector<uint32_t> &off);
 };
 

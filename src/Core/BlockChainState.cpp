@@ -245,9 +245,10 @@ std::string BlockChainState::check_standalone_consensus(
 	}
 	info->block_size               = static_cast<uint32_t>(pb.coinbase_tx_size + cumulative_size);
 	auto max_block_cumulative_size = m_currency.max_block_cumulative_size(info->height);
+    //m_log(logging::INFO) << "Info->block_size: " << info->block_size << " max_block_cumulative_size: " << max_block_cumulative_size << std::endl;
 	if (info->block_size > max_block_cumulative_size)
     {
-        //m_log(logging::ERROR) << "CUMULATIVE_BLOCK_SIZE_TOO_BIG - info->block_size: " << info->block_size << " max_block_cumulative_size: " << max_block_cumulative_size << std::endl;
+        m_log(logging::ERROR) << "CUMULATIVE_BLOCK_SIZE_TOO_BIG - info->block_size: " << info->block_size << " max_block_cumulative_size: " << max_block_cumulative_size << std::endl;
 		return "CUMULATIVE_BLOCK_SIZE_TOO_BIG";
     }
 
@@ -482,10 +483,6 @@ bool BlockChainState::create_mining_block_template(BlockTemplate *b, const Accou
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
                                   << "effective_size_median: " << effective_size_median << std::endl;
-
-            if(tx_size > block_size_limit)
-                remove_from_pool(tit->first);
-
 			continue;
         }
         else
@@ -688,9 +685,6 @@ bool BlockChainState::create_mining_block_template2(BlockTemplate *b, const Acco
                                   << std::endl << "tx fee: " << tit->second.fee << std::endl
                                   << "next_block_granted_full_reward_zone: " << next_block_granted_full_reward_zone << std::endl
                                   << "effective_size_median: " << effective_size_median << std::endl;
-
-            if(tx_size > block_size_limit)
-                remove_from_pool(tit->first);
 
 			continue;
         }else
@@ -899,6 +893,14 @@ AddTransactionResult BlockChainState::add_transaction(const Hash &tid, const Tra
 	const Amount my_fee_per_byte = my_fee / my_size;
 	Hash minimal_tid;
 	Amount minimal_fee = minimum_pool_fee_per_byte(&minimal_tid);
+
+    auto effective_size_median = get_next_effective_median_size();
+    auto max_total_size = (125*effective_size_median)/100;
+    if(my_size>max_total_size) {
+        m_log(logging::ERROR) << "TRANSACTION TOO BIG " << tid << " size: " << my_size << std::endl;
+        return AddTransactionResult::BAN;
+    }
+
 	// Invariant is if 1 byte of cheapest transaction fits, then all transaction fits
 	if (m_memory_state_total_size >= MAX_POOL_SIZE && my_fee_per_byte < minimal_fee)
 		return AddTransactionResult::INCREASE_FEE;
@@ -973,7 +975,7 @@ AddTransactionResult BlockChainState::add_transaction(const Hash &tid, const Tra
 			all_inserted = false;
 	}
     if (!m_memory_state_tx.insert(std::make_pair(tid, PoolTransaction(tx, binary_tx, my_fee, platform::now_unix_timestamp())))
-	         .second)  // TODO set timestamp
+             .second)
 		all_inserted = false;
 	if (!m_memory_state_fee_tx[my_fee_per_byte].insert(tid).second)
 		all_inserted = false;
