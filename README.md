@@ -76,8 +76,8 @@ $zelerius> git clone https://github.com/LMDB/lmdb.git
 Create build directory inside `Zelerius-Network`, go there and run CMake and Make:
 ```
 $zelerius> cd Zelerius-Network
-$zelerius/Zelerius-Network> mkdir Zelerius-Network/build
-$zelerius/Zelerius-Network> cd Zelerius-Network/build
+$zelerius/Zelerius-Network> mkdir build
+$zelerius/Zelerius-Network> cd build
 $zelerius/zelerius/Zelerius-Network/build> cmake ..
 $zelerius/zelerius/Zelerius-Network/build> time make -j4 (4 is an example, it is the number of CPU threads)
 ```
@@ -208,6 +208,7 @@ Build boost (build 32-bit boost version only if you need 32-bit zelerius binarie
 $> cd boost
 $C:\zelerius\boost> bootstrap.bat
 $C:\zelerius\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage
+$C:\zelerius\boost> b2.exe address-model=64 link=static -j 8 --build-dir=build64 --stagedir=stage runtime-link=static (if you want build static version)
 $C:\zelerius\boost> b2.exe address-model=32 link=static -j 8 --build-dir=build32 --stagedir=stage32
 cd ..
 ```
