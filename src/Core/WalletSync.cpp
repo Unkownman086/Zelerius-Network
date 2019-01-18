@@ -169,7 +169,7 @@ void WalletSync::send_get_blocks() {
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else if (response.r.status == 410) {
 			    m_sync_error = "WRONG_DAEMON_VERSION";
-			    m_log(logging::INFO) << "Wrong daemon version - please upgrade bytecoind" << std::endl;
+                m_log(logging::INFO) << "Wrong daemon version - please upgrade zeleriusd" << std::endl;
 			    m_status_timer.once(STATUS_ERROR_PERIOD);
 		    } else if (response.r.status == 200) {
 			    m_sync_error = "WRONG_BLOCKCHAIN";
