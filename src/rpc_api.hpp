@@ -165,6 +165,15 @@ enum return_code {
 	WALLETD_EXPORTKEYS_MORETHANONE = 212  // We can export keys only if wallet file contains exactly 1 spend keypair
 };
 
+// Returned from many methods
+struct ErrorAddress : public json_rpc::Error {
+    std::string address;
+    ErrorAddress() {}
+    ErrorAddress(int c, const std::string &msg, const std::string &address);
+    void seria_data_members(seria::ISeria &s) override;
+    enum { ADDRESS_FAILED_TO_PARSE = -4, ADDRESS_NOT_IN_WALLET = -1002 };
+};
+
 struct ErrorWrongHeight : public json_rpc::Error {
     HeightOrDepth request_height = 0;
     Height top_block_height      = 0;
@@ -308,54 +317,70 @@ struct GetTransfers {  // Can be used incrementally by high-performace clients t
 };
 
 struct CreateTransaction {
-	static std::string method() { return "create_transaction"; }
+    static std::string method() { return "create_transaction"; }
 
-	struct Request {
-		api::Transaction transaction;  // You fill only basic info (anonymity, optional unlock_time, optional
-		                               // payment_id) and transfers. All positive transfers (amount > 0) will be added
-		                               // as outputs. For all negative transfers (amount < 0), spendable for requested
-		                               // sum and address will be selected and added as inputs
-		std::vector<std::string> spend_addresses;
-		// If this is not empty, will spend (and optimize) outputs for this addresses to get
-		// neccessary funds. Otherwise will spend any output in the wallet
-		bool any_spend_address = false;  // if you set spend_address to empty, you should set any_spend_address to true.
-		                                 // This is protection against client bug when spend_address is forgotten or
-		                                 // accidentally set to null, etc
-		std::string change_address;      // Change will be returned to change_address.
-		HeightOrDepth confirmed_height_or_depth = -DEFAULT_CONFIRMATIONS - 1;
-		// Mix-ins will be selected from the [0..confirmed_height] window.
-		// Reorganizations larger than confirmations may change mix-in global indices, making transaction invalid.
-		SignedAmount fee_per_byte = 0;  // Fee of created transaction will be close to the size of tx * fee_per_byte.
-		                                // You can check it in response.transaction.fee before sending, if you wish
-		std::string optimization;  // Wallet outputs optimization (fusion). Leave empty to use normal optimization, good
-		                           // for wallets with balanced sends to receives count. You can save on a few percent
-		                           // of fee (on average) by specifying "minimal" for wallet receiving far less
-		                           // transactions than sending. You should use "aggressive" for wallet receiving far
-		                           // more transactions than sending, this option will use every opportunity to reduce
-		                           // number of outputs. For better optimization use as little anonymity as possible. If
-		                           // anonymity is set to 0, wallet will prioritize optimizing out dust and crazy (large
-		                           // but not round) denominations of outputs.
-		bool save_history = true;  // If true, wallet will save encrypted transaction data (~100 bytes per used address)
-		                           // in <wallet_file>.history/. With this data it is possible to generate
-		                           // public-checkable proofs of sending funds to specific addresses.
-		std::vector<Hash> prevent_conflict_with_transactions;
-		// Experimental API for guaranteed payouts under any circumstances
-	};
-	struct Response {
-		BinaryArray binary_transaction;  // Empty if error
-		api::Transaction transaction;
-		// block_hash will be empty, block_height set to current pool height (may change later)
-		bool save_history_error = false;          // When wallet on read-only media. Most clients should ignore this
-		std::vector<Hash> transactions_required;  // Works together with prevent_conflict_with_transactions
-		// If not empty, you should resend those transactions before trying create_transaction again to prevent
-		// conflicts
-	};
-	enum {
-		NOT_ENOUGH_FUNDS                  = -301,
-		TRANSACTION_DOES_NOT_FIT_IN_BLOCK = -302,  // Sender will have to split funds into several transactions
-		NOT_ENOUGH_ANONYMITY              = -303
-	};
-	typedef json_rpc::Error Error;
+    struct Request {
+        api::Transaction
+            transaction;  // You fill only basic info (anonymity, optional unlock_block_or_timestamp, optional
+                          // payment_id) and transfers. All positive transfers (amount > 0) will be added
+                          // as outputs. For all negative transfers (amount < 0), spendable for requested
+                          // sum and address will be selected and added as inputs
+        std::vector<std::string> spend_addresses;
+        // If this is not empty, will spend (and optimize) outputs for this addresses to get
+        // neccessary funds. Otherwise will spend any output in the wallet
+        bool any_spend_address = false;  // if you set spend_address to empty, you should set any_spend_address to true.
+                                         // This is protection against client bug when spend_address is forgotten or
+                                         // accidentally set to null, etc
+        std::string change_address;      // Change will be returned to change_address.
+        HeightOrDepth confirmed_height_or_depth = -DEFAULT_CONFIRMATIONS - 1;
+        // Mix-ins will be selected from the [0..confirmed_height] window.
+        // Reorganizations larger than confirmations may change mix-in global indices, making transaction invalid.
+        Amount fee_per_byte = std::numeric_limits<Amount>::max();  // Fee of created transaction will be close to the
+                                                                   // size of tx * fee_per_byte.
+        // You can check it in response.transaction.fee before sending, if you wish
+        std::string optimization;  // Wallet outputs optimization (fusion). Leave empty to use normal optimization, good
+                                   // for wallets with balanced sends to receives count. You can save on a few percent
+                                   // of fee (on average) by specifying "minimal" for wallet receiving far less
+                                   // transactions than sending. You should use "aggressive" for wallet receiving far
+                                   // more transactions than sending, this option will use every opportunity to reduce
+                                   // number of outputs. For better optimization use as little anonymity as possible. If
+                                   // anonymity is set to 0, wallet will prioritize optimizing out dust and crazy (large
+                                   // but not round) denominations of outputs.
+        bool save_history = true;  // If true, wallet will save encrypted transaction data (~100 bytes per used address)
+                                   // in <wallet_file>.history/. With this data it is possible to generate
+                                   // public-checkable proofs of sending funds to specific addresses.
+        bool subtract_fee_from_amount = false;
+        // If true, fee wil be subtracted from transfers in their respective order
+        std::vector<Hash> prevent_conflict_with_transactions;
+        // Experimental API for guaranteed payouts under any circumstances
+    };
+    struct Response {
+        BinaryArray binary_transaction;  // Empty if error
+        api::Transaction transaction;
+        // block_hash will be empty, block_height set to current pool height (may change later)
+        bool save_history_error = false;          // When wallet on read-only media. Most clients should ignore this
+        std::vector<Hash> transactions_required;  // Works together with prevent_conflict_with_transactions
+        // If not empty, you should resend those transactions before trying create_transaction again to prevent
+        // conflicts
+    };
+    enum {
+        NOT_ENOUGH_FUNDS        = -301,
+        NOT_ENOUGH_ANONYMITY    = -303,
+        VIEW_ONLY_WALLET        = -304,
+        ADDRESS_FAILED_TO_PARSE = -4,    // returns ErrorAddress
+        INVALID_HEIGHT_OR_DEPTH = -2,    // height_or_depth too low or too high
+        ADDRESS_NOT_IN_WALLET   = -1002  // returns ErrorAddress
+    };
+    struct ErrorTransactionTooBig : public json_rpc::Error {
+        Amount max_amount                = 0;
+        Amount max_zero_anonymity_amount = 0;
+        ErrorTransactionTooBig() {}
+        ErrorTransactionTooBig(const std::string &msg, Amount a, Amount a_zero);
+        void seria_data_members(seria::ISeria &s) override;
+        enum {
+            TRANSACTION_DOES_NOT_FIT_IN_BLOCK = -302  // Sender will have to split funds into several transactions
+        };
+    };
 };
 
 struct SendTransaction {

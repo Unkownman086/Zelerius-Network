@@ -501,7 +501,7 @@ std::unordered_map<std::string, Node::JSONRPCHandlerFunction> Node::m_jsonrpc_ha
     {api::bytecoind::GetArchive::method(), json_rpc::make_member_method(&Node::on_get_archive)},
     {api::bytecoind::SendTransaction::method(), json_rpc::make_member_method(&Node::handle_send_transaction3)},
     {api::bytecoind::CheckSendProof::method(), json_rpc::make_member_method(&Node::handle_check_sendproof3)},
-    //	{api::bytecoind::GetRawBlock::method(), json_rpc::make_member_method(&Node::on_get_raw_block)},
+    {api::bytecoind::GetRawBlock::method(), json_rpc::make_member_method(&Node::on_get_raw_block)},
     {api::bytecoind::SyncBlocks::method(), json_rpc::make_member_method(&Node::on_wallet_sync3)},
     {api::bytecoind::GetRawTransaction::method(), json_rpc::make_member_method(&Node::on_get_raw_transaction3)},
     {api::bytecoind::SyncMemPool::method(), json_rpc::make_member_method(&Node::on_sync_mempool3)}};

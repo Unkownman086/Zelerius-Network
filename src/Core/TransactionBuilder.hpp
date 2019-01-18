@@ -42,8 +42,7 @@ public:
 	void set_extra_nonce(const BinaryArray &);
 
 	// before calling, make sure mix_outputs do not contain real_output...
-	size_t add_input(
-	    const AccountKeys &sender_keys, api::Output real_output, const std::vector<api::Output> &mix_outputs);
+	size_t add_input(const AccountKeys &sender_keys, api::Output real_output, const std::vector<api::Output> &mix_outputs);
 	size_t add_output(uint64_t amount, const AccountPublicAddress &to);
 
 	Amount get_outputs_amount() const { return m_outputs_amount; }
@@ -55,10 +54,9 @@ public:
 
 	static crypto::KeyPair deterministic_keys_from_seed(const Hash &tx_inputs_hash, const Hash &tx_derivation_seed);
 	static crypto::KeyPair deterministic_keys_from_seed(const TransactionPrefix &tx, const Hash &tx_derivation_seed);
-	static bool generate_key_image_helper(const AccountKeys &ack, const crypto::PublicKey &tx_public_key,
-	    size_t real_output_index, KeyPair &in_ephemeral, crypto::KeyImage &ki);
-	static bool derive_public_key(
-	    const AccountPublicAddress &to, const SecretKey &tx_key, size_t output_index, PublicKey &ephemeral_key);
+    static bool generate_key_image_helper(const AccountKeys &ack, const crypto::PublicKey &tx_public_key,
+                                          size_t real_output_index, KeyPair &in_ephemeral, crypto::KeyImage &ki);
+    static bool derive_public_key(const AccountPublicAddress &to, const SecretKey &tx_key, size_t output_index,PublicKey &ephemeral_key);
 	static std::vector<uint32_t> absolute_output_offsets_to_relative(const std::vector<uint32_t> &off);
 };
 
@@ -80,8 +78,10 @@ class UnspentSelector {
 	Amount m_used_total   = 0;
 	size_t m_inputs_count = 0;
 	std::vector<Amount> m_ra_amounts;
-	bool select_optimal_outputs(HaveCoins *have_coins, DustCoins *dust_coins, size_t max_digit, Amount amount,
-	    size_t anonymity, size_t optimization_count);
+    bool select_optimal_outputs(HaveCoins *have_coins, DustCoins *dust_coins, size_t max_digit, Amount amount,
+        size_t anonymity, size_t optimization_count, bool small_optimizations);
+    void select_max_outputs(
+        HaveCoins *have_coins, DustCoins *dust_coins, Amount total_amount, size_t anonymity, size_t max_inputs_count);
 
 public:
 	explicit UnspentSelector(logging::ILogger &logger, const Currency &currency, Unspents &&unspents);
@@ -90,9 +90,9 @@ public:
 	    const std::unordered_map<PublicKey, WalletRecord> &wallet_records, TransactionBuilder *builder,
 	    uint32_t anonymity, api::bytecoind::GetRandomOutputs::Response &&ra_response);
 
-	std::string select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
-	    size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
-	    std::string optimization_level, Amount *change);
+    void select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
+        size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
+        std::string optimization_level, Amount *change, Amount *receiver_fee);
 	Amount get_used_total() const { return m_used_total; }
 	const std::vector<Amount> &get_ra_amounts() const { return m_ra_amounts; }
 };

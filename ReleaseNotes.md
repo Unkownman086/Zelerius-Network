@@ -1,5 +1,14 @@
 ## Release Notes
 
+### v1.3.1
+
+- Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.
+- Added amounts to the message of the TRANSACTION_TOO_BIG error so that you see how much you can actually send (with desired or zero anonymity).
+- Added GetRawBlock method
+- Fixed bug when a big transaction persist in mempool
+- Fixed bug when txbuilder creates an invalid big tx
+- Add timestamp in mempool transaction
+
 ### v1.3.0
 
 - Updated for CN Variant 2 - height 265000 ~ 15/dec/2018
