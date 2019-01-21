@@ -242,6 +242,7 @@ constexpr size_t TWO_THRESHOLD                   = 10;  // if any of 2 coin stac
 void UnspentSelector::select_optimal_outputs(Height block_height, Timestamp block_time, Height confirmed_height,
     size_t effective_median_size, size_t anonymity, Amount total_amount, size_t total_outputs, Amount fee_per_byte,
     std::string optimization_level, Amount *change, Amount *receiver_fee) {
+
     effective_median_size = (125 * effective_median_size) / 100;  // Mining code uses 125/100
 
 	HaveCoins have_coins;
@@ -261,7 +262,7 @@ void UnspentSelector::select_optimal_outputs(Height block_height, Timestamp bloc
         if (!select_optimal_outputs(&have_coins, &dust_coins, max_digits, total_amount + (receiver_fee ? 0 : fee),
                 anonymity, optimizations, small_optimizations))
             throw json_rpc::Error(api::walletd::CreateTransaction::NOT_ENOUGH_FUNDS, "Not enough spendable funds");
-		Amount change_dust_fee = (m_used_total - total_amount - fee) % m_currency.default_dust_threshold;
+        Amount change_dust_fee = (m_used_total - total_amount - (receiver_fee ? 0 : fee)) % dust_threshold;
         size_t tx_size = get_maximum_tx_size(m_inputs_count, total_outputs + m_currency.get_max_amount_outputs(),
             anonymity);  // Expected max change outputs
         if (tx_size > optimization_median && (optimizations > 0 || small_optimizations)) {

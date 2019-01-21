@@ -1,5 +1,11 @@
 ## Release Notes
 
+### v1.3.2 [dev]
+
+- Fixed bug in flag subtract_fee_from_amount
+x Add keccak from -> https://github.com/XKCP/XKCP
+x Add ban algorithm
+
 ### v1.3.1
 
 - Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.
