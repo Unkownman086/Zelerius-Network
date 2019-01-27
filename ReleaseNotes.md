@@ -5,6 +5,8 @@
 - Fixed bug in flag subtract_fee_from_amount
 x Add keccak from -> https://github.com/XKCP/XKCP
 x Add ban algorithm
+x fix max amount message
+x Add LWMA3 diff
 
 ### v1.3.1
 

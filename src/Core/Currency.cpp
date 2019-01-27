@@ -71,6 +71,7 @@ Currency::Currency(bool is_testnet)
           parameters::DIFFICULTY_TARGET /
               platform::get_time_multiplier_for_tests()))  // multiplier can be != 1 only in testnet
     , difficulty_window_lwma2(parameters::DIFFICULTY_WINDOW_LWMA2)
+    , difficulty_window_lwma3(parameters::DIFFICULTY_WINDOW_LWMA3)
     , difficulty_window_lwma4(parameters::DIFFICULTY_WINDOW_LWMA4)
     , difficulty_limit(parameters::DIFFICULTY_LIMIT)
     , max_block_size_initial(parameters::MAX_BLOCK_SIZE_INITIAL)
@@ -86,6 +87,7 @@ Currency::Currency(bool is_testnet)
     , upgrade_height_v5(parameters::UPGRADE_HEIGHT_V5)
     , upgrade_height_v6(parameters::UPGRADE_HEIGHT_V6)
     , upgrade_height_v7(parameters::UPGRADE_HEIGHT_V7)
+    , upgrade_height_v8(parameters::UPGRADE_HEIGHT_V8)
     , current_transaction_version(CURRENT_TRANSACTION_VERSION)
     , genesis_coinbase_tx_hex(GENESIS_COINBASE_TX_HEX)
     , genesis_coinbase_tx_hex_test(GENESIS_COINBASE_TX_HEX_TEST)
@@ -104,6 +106,7 @@ Currency::Currency(bool is_testnet)
         upgrade_height_v5 = parameters::UPGRADE_HEIGHT_V5_TEST;
         upgrade_height_v6 = parameters::UPGRADE_HEIGHT_V6_TEST;
         upgrade_height_v7 = parameters::UPGRADE_HEIGHT_V7_TEST;
+        upgrade_height_v8 = parameters::UPGRADE_HEIGHT_V8_TEST;
     }
 
     r = from_hex(genesis_coinbase_tx_hex, miner_tx_blob);
@@ -186,7 +189,9 @@ uint8_t Currency::get_block_major_version_for_height(Height height) const {
         return parameters::V5;
     if (height > upgrade_height_v6 && height <= upgrade_height_v7)
         return parameters::V6;// CN v2 (V8)
-    return parameters::V7;// Testing
+    if (height > upgrade_height_v7 && height <= upgrade_height_v8)
+        return parameters::V7;// CN variant zlx + LWMA3
+    return parameters::V8;// Testing
 }
 
 uint8_t Currency::get_block_minor_version_for_height(Height height) const {
@@ -485,7 +490,7 @@ Difficulty Currency::next_effective_difficulty(uint8_t block_major_version, std:
     {
         return next_difficultyLWMA2(timestamps,cumulative_difficulties);
     }else{
-        return next_difficultyLWMA4(timestamps,cumulative_difficulties);
+        return next_difficultyLWMA3(timestamps,cumulative_difficulties);
     }
 }
 
@@ -544,6 +549,75 @@ Difficulty Currency::next_difficultyLWMA2(std::vector<Timestamp> timestamps, std
         next_D = static_cast<int64_t>(difficulty_limit);
 
     return static_cast<uint64_t>(next_D);
+}
+
+// LWMA-3 difficulty algorithm
+// Copyright (c) 2017-2018 Zawy, MIT License
+// https://github.com/zawy12/difficulty-algorithms/issues/3
+Difficulty Currency::next_difficultyLWMA3(std::vector<Timestamp> timestamps, std::vector<CumulativeDifficulty> cumulative_difficulties) const
+{
+    uint64_t T = difficulty_target;
+    uint64_t N = difficulty_window_lwma3 - 1;
+    uint64_t L(0), ST, sum_3_ST(0), next_D, prev_D, thisTimestamp, previousTimestamp;
+
+    /* If we are starting up, returning a difficulty guess. If you are a
+       new coin, you might want to set this to a decent estimate of your
+       hashrate */
+    if (timestamps.size() <= 10)
+    {
+        return difficulty_limit;
+    }
+
+    /* Don't have the full amount of blocks yet, starting up */
+    if (timestamps.size() < N+1)
+    {
+        N = timestamps.size() - 1;
+    }
+
+    previousTimestamp = timestamps[0];
+
+    for (uint64_t i = 1; i <= N; i++)
+    {
+        if (timestamps[i] > previousTimestamp)
+        {
+            thisTimestamp = timestamps[i];
+        }
+        else
+        {
+            thisTimestamp = previousTimestamp + 1;
+        }
+
+        ST = std::min(6 * T, thisTimestamp - previousTimestamp);
+        previousTimestamp = thisTimestamp;
+        L +=  ST * i;
+
+        if (i > N-3)
+        {
+            sum_3_ST += ST;
+        }
+    }
+
+    CumulativeDifficulty nD = (cumulative_difficulties[N] - cumulative_difficulties[0]);
+    next_D = (nD.lo *T*(N+1)*99 ) / (100*2*L);
+
+    CumulativeDifficulty pD = (cumulative_difficulties[N] - cumulative_difficulties[N-1]);
+    prev_D = pD.lo;
+
+    next_D = std::max((prev_D * 67) / 100, std::min(next_D, (prev_D * 150) / 100));
+
+    if(nD.hi!=0 || pD.hi!=0)
+        return 0;//DIFFICULTY_OVERHEAD
+
+    if (sum_3_ST < (8 * T) / 10)
+    {
+        next_D = std::max(next_D, (prev_D * 108) / 100);
+    }
+
+    // Minimum limit
+    if (next_D < difficulty_limit)
+        next_D = difficulty_limit;
+
+    return next_D;
 }
 
 
@@ -686,7 +760,8 @@ bool Currency::check_proof_of_work(const Hash &long_block_hash,
     case parameters::V4:
     case parameters::V5:
     case parameters::V6://CNv2
-    case parameters::V7://Testing
+    case parameters::V7://CNzlx + LWMA3
+    case parameters::V8://Testing
         return check_proof_of_work_v2(long_block_hash, block, current_difficulty);
 	}
 	//  logger(ERROR, BrightRed) << "Unknown block major version: " <<

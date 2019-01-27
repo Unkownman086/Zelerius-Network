@@ -25,6 +25,7 @@ const uint32_t DIFFICULTY_TARGET = 30;// seconds
 const uint32_t BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW = 11;
 const uint32_t DIFFICULTY_WINDOW_LWMA2 = 60;
 const uint32_t DIFFICULTY_WINDOW_LWMA4 = DIFFICULTY_WINDOW_LWMA2;
+const uint32_t DIFFICULTY_WINDOW_LWMA3 = DIFFICULTY_WINDOW_LWMA2;
 const uint32_t CRYPTONOTE_BLOCK_FUTURE_TIME_LIMIT = 6 * DIFFICULTY_TARGET;
 const uint64_t DIFFICULTY_LIMIT = 1000;// Min diff
 
@@ -77,7 +78,8 @@ const uint32_t UPGRADE_HEIGHT_V3 = 2;
 const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces max block size ( ~ 06/oct/2018 )
 const uint32_t UPGRADE_HEIGHT_V6 = 265000; //CN Variant 2 ( ~ 15/dec/2018 )
-const uint32_t UPGRADE_HEIGHT_V7 = static_cast<uint32_t>(-1); // Future hard fork
+const uint32_t UPGRADE_HEIGHT_V7 = static_cast<uint32_t>(-1); // CN Variant zlx + LWMA3
+const uint32_t UPGRADE_HEIGHT_V8 = static_cast<uint32_t>(-1); // Future hard fork
 
 //==================================TEST NET================================================
 const uint32_t UPGRADE_HEIGHT_V2_TEST = 1;
@@ -85,7 +87,8 @@ const uint32_t UPGRADE_HEIGHT_V3_TEST = 2;
 const uint32_t UPGRADE_HEIGHT_V4_TEST = 3; // CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5_TEST = 4; // Reduces max block size
 const uint32_t UPGRADE_HEIGHT_V6_TEST = 5; // CN Variant 2
-const uint32_t UPGRADE_HEIGHT_V7_TEST = 6; // LWMA-4 (Testing)
+const uint32_t UPGRADE_HEIGHT_V7_TEST = 6; // CN Variant zlx + LWMA3
+const uint32_t UPGRADE_HEIGHT_V8_TEST = 7; // Future hard fork
 
 const uint8_t V1 = 1; //V1
 const uint8_t V2 = 2; //UPGRADE_HEIGHT_V2
@@ -94,6 +97,7 @@ const uint8_t V4 = 4; //UPGRADE_HEIGHT_V4
 const uint8_t V5 = 5; //UPGRADE_HEIGHT_V5
 const uint8_t V6 = 6; //UPGRADE_HEIGHT_V6
 const uint8_t V7 = 7; //UPGRADE_HEIGHT_V7
+const uint8_t V8 = 8; //UPGRADE_HEIGHT_V8
 //==========================================================================================
 
 const char CRYPTONOTE_BLOCKS_FILENAME[]       = "blocks.bin";
