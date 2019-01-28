@@ -709,8 +709,6 @@ Difficulty Currency::next_difficultyLWMA4(std::vector<Timestamp> timestamps, std
    return  next_D;
 }
 
-
-
 bool Currency::check_proof_of_work_v1(const Hash &long_block_hash,
     const BlockTemplate &block,
     Difficulty current_difficulty) const {
@@ -858,6 +856,11 @@ Hash bytecoin::get_block_long_hash(const BlockTemplate &bh, crypto::CryptoNightC
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),2);
+    }
+    if (bh.major_version >= parameters::V7) {
+        auto serializer = make_parent_block_serializer(bh, true, true);
+        BinaryArray raw_hashing_block = seria::to_binary(serializer);
+        return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),3);
     }
     throw std::runtime_error("Unknown block major version.");
 }

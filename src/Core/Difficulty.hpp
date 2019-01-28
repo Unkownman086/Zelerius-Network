@@ -9,9 +9,11 @@
 #include "CryptoNote.hpp"
 #include "common/Int128.hpp"
 
+
 namespace bytecoin {
 
 bool check_hash(const crypto::Hash &hash, Difficulty difficulty);
 
 typedef common::Uint128 CumulativeDifficulty;
+
 }
