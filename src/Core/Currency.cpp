@@ -852,7 +852,7 @@ Hash bytecoin::get_block_long_hash(const BlockTemplate &bh, crypto::CryptoNightC
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),1);
     }
-    if (bh.major_version >= parameters::V6) {
+    if (bh.major_version >= parameters::V6 && bh.major_version < parameters::V7) {
         auto serializer = make_parent_block_serializer(bh, true, true);
         BinaryArray raw_hashing_block = seria::to_binary(serializer);
         return crypto_ctx.cn_slow_hash(raw_hashing_block.data(), raw_hashing_block.size(),2);

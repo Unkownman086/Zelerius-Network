@@ -46,8 +46,8 @@
 #include "aesb.h"
 
 #define MEMORY         (1 << 21) // 2MB scratchpad
-#define ITER           (1 << 20) // 0x80000
-#define ITER_ZLX        0x60000
+#define ITER            0x80000 * 2 //(1 << 20)
+#define ITER_ZLX        0x60000 * 2
 #define AES_BLOCK_SIZE  16
 #define AES_KEY_SIZE    32
 #define INIT_SIZE_BLK   8
@@ -60,7 +60,7 @@
   uint32_t iterations = ITER; \
   do if (variant == 3) \
   { \
-    iterations = ITER_ZLX << 1; \
+    iterations = ITER_ZLX; \
   } while(0)
 
 #define VARIANT1_1(p) \
