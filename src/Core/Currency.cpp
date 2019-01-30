@@ -560,34 +560,23 @@ Difficulty Currency::next_difficultyLWMA3(std::vector<Timestamp> timestamps, std
     uint64_t N = difficulty_window_lwma3 - 1;
     uint64_t L(0), ST, sum_3_ST(0), next_D, prev_D, thisTimestamp, previousTimestamp;
 
-    /* If we are starting up, returning a difficulty guess. If you are a
-       new coin, you might want to set this to a decent estimate of your
-       hashrate */
     if (timestamps.size() <= 10)
-    {
         return difficulty_limit;
-    }
 
     /* Don't have the full amount of blocks yet, starting up */
     if (timestamps.size() < N+1)
-    {
         N = timestamps.size() - 1;
-    }
 
     previousTimestamp = timestamps[0];
 
     for (uint64_t i = 1; i <= N; i++)
     {
         if (timestamps[i] > previousTimestamp)
-        {
             thisTimestamp = timestamps[i];
-        }
         else
-        {
             thisTimestamp = previousTimestamp + 1;
-        }
 
-        ST = std::min(6 * T, thisTimestamp - previousTimestamp);
+        ST = std::min(6*T, thisTimestamp - previousTimestamp);
         previousTimestamp = thisTimestamp;
         L +=  ST * i;
 

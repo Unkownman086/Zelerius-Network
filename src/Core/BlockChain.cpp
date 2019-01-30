@@ -138,9 +138,9 @@ void BlockChain::db_commit() {
 	m_log(logging::INFO) << "BlockChain::db_commit finished..." << std::endl;
 }
 
-BroadcastAction BlockChain::add_block(
-    const PreparedBlock &pb, api::BlockHeader *info, const std::string &source_address) {
+BroadcastAction BlockChain::add_block(const PreparedBlock &pb, api::BlockHeader *info, const std::string &source_address) {
 	*info            = api::BlockHeader();
+
 	bool have_header = read_header(pb.bid, info);
 	bool have_block  = has_block(pb.bid);
 	if (have_block && have_header) {
@@ -162,8 +162,7 @@ BroadcastAction BlockChain::add_block(
 	// Rest fields are filled by check_standalone_consensus
 	std::string check_error = check_standalone_consensus(pb, info, prev_info, true);
 	Hash first_difficulty_check_hash;
-	invariant(
-	    common::pod_from_hex(difficulty_check[0].hash, first_difficulty_check_hash), "DifficultyCheck table corrupted");
+	invariant(common::pod_from_hex(difficulty_check[0].hash, first_difficulty_check_hash), "DifficultyCheck table corrupted");
 	if (info->hash == first_difficulty_check_hash &&
 	    info->cumulative_difficulty != difficulty_check[0].cumulative_difficulty) {
 		m_log(logging::ERROR) << "Reached first difficulty checkpoint with wrong cumulative_difficulty "
@@ -172,11 +171,14 @@ BroadcastAction BlockChain::add_block(
 		                      << m_db.get_path() << std::endl;
 		std::exit(api::BYTECOIND_DATABASE_ERROR);
 	}
-	if (!check_error.empty())
+
+    if (!check_error.empty())
     {
-        m_log(logging::ERROR) << "check_error BAN! "<< check_error << std::endl;
+        m_log(logging::WARNING) << "check_error BAN! "<< check_error << " source address " << source_address << std::endl;
+
 		return BroadcastAction::BAN;  // TODO - return check_error
     }
+
 	if (!add_blod(*info)) {           // Has parent that does not pass through last SW checkpoint
 		if (info->height > m_currency.last_sw_checkpoint().first)
 			m_archive.add(Archive::BLOCK, pb.block_data, pb.bid, source_address);
