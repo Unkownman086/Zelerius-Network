@@ -42,6 +42,7 @@ platform::lmdb::Txn::Txn(Env &db_env) {
 void platform::lmdb::Txn::commit() {
     try {
         lmdb_check(::mdb_txn_commit(handle), "mdb_txn_commit ");
+        handle = nullptr;
     } catch (std::exception &e) {
         std::cout << "commit erorr -> " << e.what() << std::endl;
     }
