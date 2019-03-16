@@ -78,7 +78,7 @@ const uint32_t UPGRADE_HEIGHT_V3 = 2;
 const uint32_t UPGRADE_HEIGHT_V4 = 3; //CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5 = 64000; //Reduces max block size ( ~ 06/oct/2018 )
 const uint32_t UPGRADE_HEIGHT_V6 = 265000; //CN Variant 2 ( ~ 15/dec/2018 )
-const uint32_t UPGRADE_HEIGHT_V7 = static_cast<uint32_t>(-1); // CN Variant zlx + LWMA3
+const uint32_t UPGRADE_HEIGHT_V7 = 534800; // CN Variant zls + LWMA3 ( ~ 22/mar/2019 - 23/mar/2019 )
 const uint32_t UPGRADE_HEIGHT_V8 = static_cast<uint32_t>(-1); // Future hard fork
 
 //==================================TEST NET================================================
@@ -87,7 +87,7 @@ const uint32_t UPGRADE_HEIGHT_V3_TEST = 2;
 const uint32_t UPGRADE_HEIGHT_V4_TEST = 3; // CN Variant 1
 const uint32_t UPGRADE_HEIGHT_V5_TEST = 4; // Reduces max block size
 const uint32_t UPGRADE_HEIGHT_V6_TEST = 5; // CN Variant 2
-const uint32_t UPGRADE_HEIGHT_V7_TEST = 6; // CN Variant zlx + LWMA3
+const uint32_t UPGRADE_HEIGHT_V7_TEST = 6; // CN Variant zls + LWMA3
 const uint32_t UPGRADE_HEIGHT_V8_TEST = 7; // Future hard fork
 
 const uint8_t V1 = 1; //V1
@@ -156,11 +156,12 @@ constexpr const CheckpointData CHECKPOINTS[] = {
     {150000,"70f0016d4514f8b29ca321e435c9656302722a8a75ebc2c44a1c453927c641ff"},
     {180000,"8903dfd69bb134367812fffa94830f5aceda968415c46fdcfd3194b509569aac"},
     {185678,"3253160316c2b58a53cd20437a24af0827b8577af63abcb5baa502f4a4be5622"},
-    {250000,"3611cbbef1ae4df1481f0e25fa4585136296d2b7a70df03dd1210b143a648dee"},
+    {200000,"3611cbbef1ae4df1481f0e25fa4585136296d2b7a70df03dd1210b143a648dee"},
     {300000,"ce4eb13655c60fa3408bb17fd8509f1d8c48ccb4c8b207025dbe8c0983f84366"},
     {350000,"e19ffc9e7ee462e549632e6fa59781515fb62a4c9001a69c5d030382459a55d8"},
     {400000,"c5b92d949e1d886c598dfe491f0b5e039ba69bf4d3e1ac843b3a9c9804159bd5"},
-    {420000,"6877e215c47568eef1c1e509990f822296fe17324e9f70a718f2c0c8bfd1f22b"}
+    {420000,"6877e215c47568eef1c1e509990f822296fe17324e9f70a718f2c0c8bfd1f22b"},
+    {517400,"6bd87688c12af8248bfb6fca4d450adb9c341ea86bf7fcfd0aaeaa46b6d093f2"}
 };
 
 const char GENESIS_COINBASE_TX_HEX[] =
