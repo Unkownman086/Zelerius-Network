@@ -1,12 +1,12 @@
 ## Release Notes
 
-### v1.3.2 [dev]
+### v1.4.0
 
 - Fixed bug in flag subtract_fee_from_amount
-x Add keccak from -> https://github.com/XKCP/XKCP
-x Add ban algorithm
-x fix max amount message
-x Add LWMA3 diff
+- Add ban algorithm
+- Fixed max amount message
+- Added LWMA3 diff
+- Added new CNv2 ZLS algorithm
 
 ### v1.3.1
 
