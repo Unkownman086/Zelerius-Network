@@ -16,6 +16,7 @@
 #include "p2p/P2PClientBasic.hpp"
 #include "platform/PreventSleep.hpp"
 #include "rpc_api.hpp"
+#include "platform/Time.hpp"
 
 namespace bytecoin {
 
@@ -202,6 +203,9 @@ protected:
 		void on_chain_timer();
 		void on_download_timer();
 		void advance_chain();
+
+        std::map<std::string,Timestamp> banlist;
+        Timestamp time_banned = 60 * 60 * 30; // seconds
 
 	public:
 		DownloaderV11(Node *node, BlockChainState &block_chain);

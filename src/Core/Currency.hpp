@@ -60,6 +60,7 @@ public:
 
 	Timestamp difficulty_target;
     uint32_t difficulty_window_lwma2;
+    uint32_t difficulty_window_lwma3;
     uint32_t difficulty_window_lwma4;
     Difficulty difficulty_limit;
     Height difficulty_blocks_count() const { return difficulty_window_lwma2; }//difficulty_window + difficulty_lag; }
@@ -79,6 +80,7 @@ public:
     Height upgrade_height_v5;
     Height upgrade_height_v6;
     Height upgrade_height_v7;
+    Height upgrade_height_v8;
 
 	uint8_t get_block_major_version_for_height(Height) const;
 	uint8_t get_block_minor_version_for_height(Height) const;
@@ -119,6 +121,7 @@ public:
 
     Difficulty next_difficultyLWMA2(std::vector<Timestamp> timestamps, std::vector<CumulativeDifficulty> cumulative_difficulties) const;
     Difficulty next_difficultyLWMA4(std::vector<Timestamp> timestamps, std::vector<CumulativeDifficulty> cumulative_difficulties) const;
+    Difficulty next_difficultyLWMA3(std::vector<Timestamp> timestamps, std::vector<CumulativeDifficulty> cumulative_difficulties) const;
 
 	bool check_proof_of_work_v1(
 	    const Hash &long_block_hash, const BlockTemplate &block, Difficulty current_difficulty) const;

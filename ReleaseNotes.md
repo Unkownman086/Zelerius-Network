@@ -1,5 +1,13 @@
 ## Release Notes
 
+### v1.4.0
+
+- Fixed bug in flag subtract_fee_from_amount
+- Add ban algorithm
+- Fixed max amount message
+- Added LWMA3 diff
+- Added new CNv2 ZLS algorithm
+
 ### v1.3.1
 
 - Added a new flag subtract_fee_from_amount to the create_transaction method to indicate subtracting fee from receivers.

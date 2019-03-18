@@ -184,7 +184,20 @@ void Node::DownloaderV11::advance_chain() {
 	}
 	if (worth_clients.empty())
 		return;  // We hope to get more connections soon
-	m_chain_client       = worth_clients.at(crypto::rand<size_t>() % worth_clients.size());
+    size_t random_client = crypto::rand<size_t>() % worth_clients.size();
+    m_chain_client       = worth_clients.at(random_client);
+
+    std::string address_port = common::ip_address_and_port_to_string(m_chain_client->get_address().ip, m_chain_client->get_address().port);
+    auto ban_it = banlist.find(address_port);
+    Timestamp current_time = platform::now_unix_timestamp();
+
+    if (ban_it != banlist.end()) {
+        if(current_time <= ban_it->second + time_banned)
+            return;
+        else
+            banlist.erase(ban_it);
+    }
+
 	m_chain_request_sent = true;
 	NOTIFY_REQUEST_CHAIN::request msg;
 	msg.block_ids = m_block_chain.get_sparse_chain();
@@ -321,17 +334,31 @@ bool Node::DownloaderV11::on_idle() {
 		prepared_blocks.clear();
 	}
 	auto idea_start = std::chrono::high_resolution_clock::now();
+
 	while (!m_download_chain.empty() && m_download_chain.front().status == DownloadCell::PREPARED) {
 		DownloadCell dc = std::move(m_download_chain.front());
 		m_download_chain.pop_front();
 		api::BlockHeader info;
-		auto action = m_block_chain.add_block(
-		    dc.pb, &info, common::ip_address_and_port_to_string(dc.block_source.ip, dc.block_source.port));
+        std::string address_port = common::ip_address_and_port_to_string(dc.block_source.ip, dc.block_source.port);
+        auto ban_it = banlist.find(address_port);
+        Timestamp current_time = platform::now_unix_timestamp();
+
+        if (ban_it != banlist.end()) {
+            if(current_time <= ban_it->second + time_banned)
+                continue;
+            else
+                banlist.erase(ban_it);
+        }
+
+        auto action = m_block_chain.add_block(dc.pb, &info, address_port);
 		if (action == BroadcastAction::BAN) {
 			m_node->m_log(logging::INFO) << "Downloader DownloadCell BAN height=" << dc.expected_height
 			                             << " wb=" << dc.bid << std::endl;
-			// TODO - ban client who gave us chain
-			//			continue;
+            // TODO - ban client who gave us chain
+            //dc.downloading_client->disconnect(std::string());
+            banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));
+            m_node->m_log(logging::WARNING) << "BANNED -> " << address_port << std::endl;
+            continue;
 		}
 		//		if (action == BroadcastAction::NOTHING)
 		//			std::cout << "BroadcastAction::NOTHING height=" << info.height << " cd=" <<
