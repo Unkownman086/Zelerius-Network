@@ -1,5 +1,9 @@
 ## Release Notes
 
+### v1.4.1
+- Ban algoritm changed (acts in case of wrong version and in case of not updating)
+- Commit every 5000 blocks
+
 ### v1.4.0
 
 - Fixed bug in flag subtract_fee_from_amount
