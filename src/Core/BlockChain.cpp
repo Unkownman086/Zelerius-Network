@@ -39,7 +39,7 @@ static const std::string CD_TIPS_PREFIX  = "x-tips/";
 // We store bid->children counter, with counter=1 default (absent from index)
 // We store cumulative_difficulty->bid for bids with no children
 
-static const size_t COMMIT_EVERY_N_BLOCKS = 50000;  // We do not want to create too large transactions
+static const size_t COMMIT_EVERY_N_BLOCKS = 5000;  // We do not want to create too large transactions
 
 static const std::string delete_blockchain_message = "database corrupted, please delete ";
 
@@ -175,6 +175,9 @@ BroadcastAction BlockChain::add_block(const PreparedBlock &pb, api::BlockHeader 
     if (!check_error.empty())
     {
         m_log(logging::WARNING) << "check_error BAN! "<< check_error << " source address " << source_address << std::endl;
+
+        if(check_error=="WRONG_VERSION")
+            return BroadcastAction::WRONG_VERSION; //TODO
 
 		return BroadcastAction::BAN;  // TODO - return check_error
     }

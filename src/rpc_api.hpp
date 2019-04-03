@@ -296,7 +296,7 @@ struct GetTransfers {  // Can be used incrementally by high-performace clients t
 	static std::string method() { return "get_transfers"; }
 
 	struct Request {
-		std::string address;                                        // empty for all addresses
+        std::string address;                                        // empty for all addresses
 		Height from_height = 0;                                     // From, but not including from_height
 		Height to_height   = std::numeric_limits<uint32_t>::max();  // Up to, and including to_height. Will return
 		                                                            // transfers in mempool if to_height >

@@ -206,8 +206,8 @@ protected:
 
         std::map<std::string,Timestamp> banlist;
         std::map<std::string,std::pair<uint32_t,Timestamp>> clients_heigth;
-        const Timestamp time_banned = 60 * 60 * 24; // seconds
-        const Timestamp time_expected = 60 * 4; // seconds
+        const Timestamp time_banned = 60 * 60 * 1; // seconds
+        const Timestamp time_expected = 60 * 2; // seconds
 
 	public:
 		DownloaderV11(Node *node, BlockChainState &block_chain);

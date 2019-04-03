@@ -20,7 +20,7 @@ namespace bytecoin {
 class Config;
 class Currency;
 
-enum class BroadcastAction { BROADCAST_ALL, NOTHING, BAN };
+enum class BroadcastAction { BROADCAST_ALL, NOTHING, BAN , WRONG_VERSION};
 enum class AddTransactionResult {
 	BAN,
 	BROADCAST_ALL,

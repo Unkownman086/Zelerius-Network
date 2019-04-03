@@ -370,15 +370,20 @@ bool Node::DownloaderV11::on_idle() {
         }
 
         auto action = m_block_chain.add_block(dc.pb, &info, address_port);
-		if (action == BroadcastAction::BAN) {
-			m_node->m_log(logging::INFO) << "Downloader DownloadCell BAN height=" << dc.expected_height
-			                             << " wb=" << dc.bid << std::endl;
+
+        if (action == BroadcastAction::WRONG_VERSION) {
             // TODO - ban client who gave us chain
             //dc.downloading_client->disconnect(std::string());
             banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));
             m_node->m_log(logging::WARNING) << "BANNED -> " << address_port << std::endl;
             continue;
 		}
+
+        if(action == BroadcastAction::BAN) {
+            m_node->m_log(logging::INFO) << "Downloader DownloadCell BAN height=" << dc.expected_height
+                                         << " wb=" << dc.bid << " -> "<< address_port << std::endl;
+            continue;
+        }
 		//		if (action == BroadcastAction::NOTHING)
 		//			std::cout << "BroadcastAction::NOTHING height=" << info.height << " cd=" <<
 		// info.cumulative_difficulty.lo
