@@ -209,6 +209,23 @@ void Node::DownloaderV11::advance_chain() {
 	BinaryArray raw_msg = LevinProtocol::send_message(NOTIFY_REQUEST_CHAIN::ID, LevinProtocol::encode(msg), false);
 	m_chain_client->send(std::move(raw_msg));
 	m_chain_timer.once(SYNC_TIMEOUT);
+
+    auto ch_it = clients_heigth.find(address_port);
+
+    if(ch_it == clients_heigth.end()){
+        std::pair<uint32_t,Timestamp> current_height(m_chain_client->get_last_received_sync_data().current_height,current_time);
+        clients_heigth.insert(std::pair<std::string,std::pair<uint32_t,Timestamp>>(address_port,current_height));
+    } else {
+        if(ch_it->second.first<=m_chain_client->get_last_received_sync_data().current_height) {
+            if( (ch_it->second.second + time_expected ) <= current_time ) {
+                clients_heigth.erase(ch_it);
+                banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));
+                m_node->m_log(logging::WARNING) << "BANNED due to not updating its chain -> " << address_port << std::endl;
+            }
+        }
+    }
+
+
 }
 
 void Node::DownloaderV11::start_download(DownloadCell &dc, P2PClientBytecoin *who) {
