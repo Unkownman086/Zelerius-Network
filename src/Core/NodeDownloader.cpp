@@ -213,14 +213,16 @@ void Node::DownloaderV11::advance_chain() {
     auto ch_it = clients_heigth.find(address_port);
 
     if(ch_it == clients_heigth.end()){
-        std::pair<uint32_t,Timestamp> current_height(m_chain_client->get_last_received_sync_data().current_height,current_time);
-        clients_heigth.insert(std::pair<std::string,std::pair<uint32_t,Timestamp>>(address_port,current_height));
+        std::pair<uint32_t,Timestamp> current_height(m_chain_client->get_last_received_sync_data().current_height,1);
+        clients_heigth.insert(std::pair<std::string,std::pair<uint32_t,uint32_t>>(address_port,current_height));
     } else {
         if(m_chain_client->get_last_received_sync_data().current_height <= ch_it->second.first) {
-            if( (ch_it->second.second + time_expected ) <= current_time ) {
+            if( ch_it->second.second > times ) {
                 clients_heigth.erase(ch_it);
-                banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));
+                banlist.insert(std::pair<std::string,Timestamp>(address_port,current_time));
                 m_node->m_log(logging::WARNING) << "BANNED due to not updating its chain -> " << address_port << std::endl;
+            } else {
+                ch_it->second.second++;
             }
         } else {
             clients_heigth.erase(ch_it);
