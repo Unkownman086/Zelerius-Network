@@ -373,7 +373,7 @@ bool Node::DownloaderV11::on_idle() {
 
         auto action = m_block_chain.add_block(dc.pb, &info, address_port);
 
-        if (action == BroadcastAction::WRONG_VERSION) {
+        if (action == BroadcastAction::BAN) {
             // TODO - ban client who gave us chain
             //dc.downloading_client->disconnect(std::string());
             banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));

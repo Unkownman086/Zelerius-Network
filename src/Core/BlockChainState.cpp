@@ -205,7 +205,7 @@ BlockChainState::BlockChainState(logging::ILogger &log, const Config &config, co
 		PreparedBlock pb(std::move(raw_block), nullptr);
 		api::BlockHeader info;
         BroadcastAction action = add_block(pb, &info, std::string());
-        invariant( ( action != BroadcastAction::BAN && action != BroadcastAction::WRONG_VERSION ) , "Genesis block failed to add");
+        invariant( action != BroadcastAction::BAN , "Genesis block failed to add");
 	}
 	BlockChainState::tip_changed();
 	m_log(logging::INFO) << "BlockChainState::BlockChainState height=" << get_tip_height()

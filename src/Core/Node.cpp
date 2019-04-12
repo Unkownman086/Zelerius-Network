@@ -214,9 +214,6 @@ void Node::P2PClientBytecoin::on_msg_notify_new_block(NOTIFY_NEW_BLOCK::request 
 	switch (action) {
 	case BroadcastAction::BAN:
 		disconnect("NOTIFY_NEW_BLOCK add_block BAN");
-		return;
-    case BroadcastAction::WRONG_VERSION:
-        disconnect("NOTIFY_NEW_BLOCK add_block BAN");
         return;
 	case BroadcastAction::BROADCAST_ALL: {
 		req.hop += 1;

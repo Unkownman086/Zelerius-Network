@@ -176,9 +176,6 @@ BroadcastAction BlockChain::add_block(const PreparedBlock &pb, api::BlockHeader 
     {
         m_log(logging::WARNING) << "check_error BAN! "<< check_error << " source address " << source_address << std::endl;
 
-        if(check_error=="WRONG_VERSION")
-            return BroadcastAction::WRONG_VERSION; //TODO
-
 		return BroadcastAction::BAN;  // TODO - return check_error
     }
 
