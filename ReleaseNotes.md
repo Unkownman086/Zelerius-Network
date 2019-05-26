@@ -3,6 +3,7 @@
 ### v1.4.1
 - Ban algoritm changed (acts in case of wrong version and in case of not updating)
 - Commit every 5000 blocks
+- Changed cleared cache message
 
 ### v1.4.0
 

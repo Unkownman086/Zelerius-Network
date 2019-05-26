@@ -588,7 +588,7 @@ bool BlockChain::read_header(const Hash &bid, api::BlockHeader *header, Height h
 		return true;
 	}
 	if (header_cache.size() > m_currency.largest_window() * 10) {
-		m_log(logging::INFO) << "BlockChain header cache reached max size and cleared" << std::endl;
+        m_log(logging::INFO) << "BlockChain header cache cleared - OK" << std::endl;
 		header_cache.clear();  // very simple policy
 	}
 	BinaryArray rb;
