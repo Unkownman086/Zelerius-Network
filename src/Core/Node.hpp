@@ -205,7 +205,9 @@ protected:
 		void advance_chain();
 
         std::map<std::string,Timestamp> banlist;
-        Timestamp time_banned = 60 * 60 * 30; // seconds
+        std::map<std::string,std::pair<uint32_t,uint32_t>> clients_heigth; // address_client / client_height, times
+        const Timestamp time_banned = 60 * 10; // seconds
+        const uint32_t times = 5; // times
 
 	public:
 		DownloaderV11(Node *node, BlockChainState &block_chain);

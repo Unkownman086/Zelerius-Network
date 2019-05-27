@@ -209,6 +209,27 @@ void Node::DownloaderV11::advance_chain() {
 	BinaryArray raw_msg = LevinProtocol::send_message(NOTIFY_REQUEST_CHAIN::ID, LevinProtocol::encode(msg), false);
 	m_chain_client->send(std::move(raw_msg));
 	m_chain_timer.once(SYNC_TIMEOUT);
+
+    auto ch_it = clients_heigth.find(address_port);
+
+    if(ch_it == clients_heigth.end()){
+        std::pair<uint32_t,Timestamp> current_height(m_chain_client->get_last_received_sync_data().current_height,1);
+        clients_heigth.insert(std::pair<std::string,std::pair<uint32_t,uint32_t>>(address_port,current_height));
+    } else {
+        if(m_chain_client->get_last_received_sync_data().current_height <= ch_it->second.first) {
+            if( ch_it->second.second > times ) {
+                clients_heigth.erase(ch_it);
+                banlist.insert(std::pair<std::string,Timestamp>(address_port,current_time));
+                m_node->m_log(logging::WARNING) << "BANNED due to not updating its chain -> " << address_port << std::endl;
+            } else {
+                ch_it->second.second++;
+            }
+        } else {
+            clients_heigth.erase(ch_it);
+        }
+    }
+
+
 }
 
 void Node::DownloaderV11::start_download(DownloadCell &dc, P2PClientBytecoin *who) {
@@ -351,15 +372,20 @@ bool Node::DownloaderV11::on_idle() {
         }
 
         auto action = m_block_chain.add_block(dc.pb, &info, address_port);
-		if (action == BroadcastAction::BAN) {
-			m_node->m_log(logging::INFO) << "Downloader DownloadCell BAN height=" << dc.expected_height
-			                             << " wb=" << dc.bid << std::endl;
+
+        if (action == BroadcastAction::BAN) {
             // TODO - ban client who gave us chain
             //dc.downloading_client->disconnect(std::string());
             banlist.insert(std::pair<std::string,Timestamp>(address_port,platform::now_unix_timestamp()));
             m_node->m_log(logging::WARNING) << "BANNED -> " << address_port << std::endl;
             continue;
 		}
+
+        if(action == BroadcastAction::BAN) {
+            m_node->m_log(logging::INFO) << "Downloader DownloadCell BAN height=" << dc.expected_height
+                                         << " wb=" << dc.bid << " -> "<< address_port << std::endl;
+            continue;
+        }
 		//		if (action == BroadcastAction::NOTHING)
 		//			std::cout << "BroadcastAction::NOTHING height=" << info.height << " cd=" <<
 		// info.cumulative_difficulty.lo

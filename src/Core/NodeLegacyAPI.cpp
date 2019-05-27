@@ -173,7 +173,7 @@ bool Node::on_submitblock(http::Client *, http::RequestData &&, json_rpc::Reques
 	RawBlock raw_block;
 	api::BlockHeader info;
 	auto broad = m_block_chain.add_mined_block(blockblob, &raw_block, &info);
-	if (broad == BroadcastAction::BAN)
+    if (broad == BroadcastAction::BAN)
 		throw json_rpc::Error{CORE_RPC_ERROR_CODE_BLOCK_NOT_ACCEPTED, "Block not accepted"};
 	NOTIFY_NEW_BLOCK::request msg;
 	msg.b                         = RawBlockLegacy{raw_block.block, raw_block.transactions};

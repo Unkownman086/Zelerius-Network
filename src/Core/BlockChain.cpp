@@ -39,7 +39,7 @@ static const std::string CD_TIPS_PREFIX  = "x-tips/";
 // We store bid->children counter, with counter=1 default (absent from index)
 // We store cumulative_difficulty->bid for bids with no children
 
-static const size_t COMMIT_EVERY_N_BLOCKS = 50000;  // We do not want to create too large transactions
+static const size_t COMMIT_EVERY_N_BLOCKS = 5000;  // We do not want to create too large transactions
 
 static const std::string delete_blockchain_message = "database corrupted, please delete ";
 
@@ -588,7 +588,7 @@ bool BlockChain::read_header(const Hash &bid, api::BlockHeader *header, Height h
 		return true;
 	}
 	if (header_cache.size() > m_currency.largest_window() * 10) {
-		m_log(logging::INFO) << "BlockChain header cache reached max size and cleared" << std::endl;
+        m_log(logging::INFO) << "BlockChain header cache cleared - OK" << std::endl;
 		header_cache.clear();  // very simple policy
 	}
 	BinaryArray rb;
