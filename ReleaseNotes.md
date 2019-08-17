@@ -1,5 +1,10 @@
 ## Release Notes
 
+### v1.4.2
+- Added certificate authorities: Encryption Everywhere DV TLS CA - G1 / DigiCert Global Root CA. (It fixes certificate verify failed on MacOS when remote node explorer.zelerius.org:58081 is used)
+- Updated version number
+- Updated CHECKPOINTS
+
 ### v1.4.1
 - Ban algoritm changed (acts in case of wrong version and in case of not updating)
 - Commit every 5000 blocks

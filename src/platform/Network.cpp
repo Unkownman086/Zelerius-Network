@@ -396,15 +396,77 @@ JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo
 Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ
 -----END CERTIFICATE-----
 )";
+
+// https://www.digicert.com/digicert-root-certificates.htm -> Encryption Everywhere DV TLS CA - G1
+static const char our_cert3[] = R"(
+-----BEGIN CERTIFICATE-----
+MIIEqjCCA5KgAwIBAgIQAnmsRYvBskWr+YBTzSybsTANBgkqhkiG9w0BAQsFADBh
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD
+QTAeFw0xNzExMjcxMjQ2MTBaFw0yNzExMjcxMjQ2MTBaMG4xCzAJBgNVBAYTAlVT
+MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+b20xLTArBgNVBAMTJEVuY3J5cHRpb24gRXZlcnl3aGVyZSBEViBUTFMgQ0EgLSBH
+MTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALPeP6wkab41dyQh6mKc
+oHqt3jRIxW5MDvf9QyiOR7VfFwK656es0UFiIb74N9pRntzF1UgYzDGu3ppZVMdo
+lbxhm6dWS9OK/lFehKNT0OYI9aqk6F+U7cA6jxSC+iDBPXwdF4rs3KRyp3aQn6pj
+pp1yr7IB6Y4zv72Ee/PlZ/6rK6InC6WpK0nPVOYR7n9iDuPe1E4IxUMBH/T33+3h
+yuH3dvfgiWUOUkjdpMbyxX+XNle5uEIiyBsi4IvbcTCh8ruifCIi5mDXkZrnMT8n
+wfYCV6v6kDdXkbgGRLKsR4pucbJtbKqIkUGxuZI2t7pfewKRc5nWecvDBZf3+p1M
+pA8CAwEAAaOCAU8wggFLMB0GA1UdDgQWBBRVdE+yck/1YLpQ0dfmUVyaAYca1zAf
+BgNVHSMEGDAWgBQD3lA1VtFMu2bwo+IbG8OXsj3RVTAOBgNVHQ8BAf8EBAMCAYYw
+HQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMBIGA1UdEwEB/wQIMAYBAf8C
+AQAwNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdp
+Y2VydC5jb20wQgYDVR0fBDswOTA3oDWgM4YxaHR0cDovL2NybDMuZGlnaWNlcnQu
+Y29tL0RpZ2lDZXJ0R2xvYmFsUm9vdENBLmNybDBMBgNVHSAERTBDMDcGCWCGSAGG
+/WwBAjAqMCgGCCsGAQUFBwIBFhxodHRwczovL3d3dy5kaWdpY2VydC5jb20vQ1BT
+MAgGBmeBDAECATANBgkqhkiG9w0BAQsFAAOCAQEAK3Gp6/aGq7aBZsxf/oQ+TD/B
+SwW3AU4ETK+GQf2kFzYZkby5SFrHdPomunx2HBzViUchGoofGgg7gHW0W3MlQAXW
+M0r5LUvStcr82QDWYNPaUy4taCQmyaJ+VB+6wxHstSigOlSNF2a6vg4rgexixeiV
+4YSB03Yqp2t3TeZHM9ESfkus74nQyW7pRGezj+TC44xCagCQQOzzNmzEAP2SnCrJ
+sNE2DpRVMnL8J6xBRdjmOsC3N6cQuKuRXbzByVBjCqAA8t1L0I+9wXJerLPyErjy
+rMKWaBFLmfK/AHNF4ZihwPGOc7w6UHczBZXH5RFzJNnww+WnKuTPI0HfnVH8lg==
+-----END CERTIFICATE-----
+)";
+
+// https://www.digicert.com/digicert-root-certificates.htm -> DigiCert Global Root CA
+// openssl x509 -in "Encryption Everywhere DV TLS CA - G1.pem" -noout -issuer
+static const char our_cert4[] = R"(
+-----BEGIN CERTIFICATE-----
+MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD
+QTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT
+MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB
+CSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97
+nh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt
+43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P
+T19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4
+gdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO
+BgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR
+TLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw
+DQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr
+hMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg
+06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF
+PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls
+YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
+CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
+-----END CERTIFICATE-----
+)";
 static void add_system_root_certs(ssl::context &ctx) {
 	// We try all methods and hope for the best
-	ctx.set_default_verify_paths();
+    ctx.set_default_verify_paths();
 	ctx.add_verify_path("/etc/ssl/certs");  // read below for the cert folder mess on Linux
 	// https://www.happyassassin.net/2015/01/12/a-note-about-ssltls-trusted-certificate-stores-and-platforms/
 	boost::asio::const_buffer cert(our_cert, sizeof(our_cert) - 1);
 	ctx.add_certificate_authority(cert);
 	boost::asio::const_buffer cert2(our_cert2, sizeof(our_cert2) - 1);
-	ctx.add_certificate_authority(cert2);
+    ctx.add_certificate_authority(cert2);
+    boost::asio::const_buffer cert3(our_cert3, sizeof(our_cert3) - 1);
+    ctx.add_certificate_authority(cert3);
+    boost::asio::const_buffer cert4(our_cert4, sizeof(our_cert4) - 1);
+    ctx.add_certificate_authority(cert4);
 }
 #endif
 
@@ -682,6 +744,55 @@ bool TCPSocket::is_open() const {
 	return impl->socket.lowest_layer().is_open();
 }
 
+/*
+bool verify_certificate_cb(bool preverified, boost::asio::ssl::verify_context& ctx)
+{
+    std::cout << "Function : " << __func__ << " ----------------- Line : " << __LINE__ << std::endl;
+    int8_t subject_name[256];
+    X509_STORE_CTX *cts = ctx.native_handle();
+    int32_t length = 0;
+    X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+    int error = X509_STORE_CTX_get_error(cts);
+    std::cout << "CTX ERROR : " << error << std::endl;
+
+    int32_t depth = X509_STORE_CTX_get_error_depth(cts);
+    std::cout << "CTX DEPTH : " << depth << std::endl;
+
+    switch (error)
+    {
+    case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+        //Debug(PRIORITY_ERROR, "X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT");
+        std::cout << "X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT" << std::endl;
+        break;
+    case X509_V_ERR_CERT_NOT_YET_VALID:
+    case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+        //Debug(PRIORITY_ERROR, "Certificate not yet valid!!");
+        std::cout << "Certificate not yet valid!!" << std::endl;
+        break;
+    case X509_V_ERR_CERT_HAS_EXPIRED:
+    case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+        //Debug(PRIORITY_ERROR, "Certificate expired..");
+        std::cout << "Certificate expired.." << std::endl;
+        break;
+    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+        //Debug(PRIORITY_WARN, "Self signed certificate in chain!!!\n");
+        std::cout << "Self signed certificate in chain!" << std::endl;
+        preverified = true;
+        break;
+    default:
+        break;
+    }
+    const int32_t name_length = 256;
+    X509_NAME_oneline(X509_get_subject_name(cert), reinterpret_cast<char*>(subject_name), name_length);
+    //Debug(PRIORITY_INFO, "Verifying %s", subject_name);
+    std::cout << "Verifying " + std::string((char*)subject_name) << std::endl;
+    //Debug(PRIORITY_INFO, "Verification status : %d", preverified);
+    std::cout << "Verification status : " + std::to_string(preverified) << std::endl;
+
+    //std::cout << "Function : " << __func__ << " ----------------- Line : " << __LINE__ << std::endl;
+    return preverified;
+}*/
+
 bool TCPSocket::connect(const std::string &addr, uint16_t port) {
 	close();
 
@@ -701,8 +812,9 @@ bool TCPSocket::connect(const std::string &addr, uint16_t port) {
 			std::shared_ptr<ssl::context> shared_client_context =
 			    std::make_shared<ssl::context>(ssl::context::tlsv12_client);
 			add_system_root_certs(*shared_client_context);
-			shared_client_context->set_verify_mode(ssl::verify_peer);
-			shared_client_context->set_verify_callback(ssl::rfc2818_verification(ssl_addr.second));
+            shared_client_context->set_verify_mode(ssl::verify_peer);
+            shared_client_context->set_verify_callback(ssl::rfc2818_verification(ssl_addr.second));
+            //shared_client_context->set_verify_callback(&verify_certificate_cb);
 
 			impl->ssl_context = shared_client_context;
 			impl->ssl_socket  = std::make_unique<SSLSocket>(EventLoop::current()->io(), *impl->ssl_context);

@@ -222,7 +222,7 @@ private:
 
 	friend class TCPAcceptor;
 	RW_handler rw_handler;
-	D_handler d_handler;
+    D_handler d_handler;
 };
 
 class TCPAcceptor : private common::Nocopy {
