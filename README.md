@@ -4,15 +4,15 @@
 
 Welcome to the repository of zelerius. Here you will find source code, instructions, wiki resources, and integration tutorials.
 
-Contents
+## IMPORTANT
+
+**[Development branch](https://github.com/zelerius/Zelerius-Network/tree/development)** is used for active development and can be either unstable or incompatible with release software so, **DO NOT USE IT!**
+
+## Contents
 * Building on Linux 64-bit
 * Building on Mac OSX
 * Building on Windows
 * Building on other platforms
-
-## IMPORTANT
-
-**Development branch** is used for active development and can be either unstable or incompatible with release software so, **DO NOT USE IT!**
 
 ## Building on Linux 64-bit
 
