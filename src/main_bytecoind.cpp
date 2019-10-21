@@ -144,7 +144,7 @@ int main(int argc, const char *argv[]) try {
 	}
 	return 0;
 } catch (const platform::ExclusiveLock::FailedToLock &ex) {
-	std::cout << "Bytecoind already running - " << ex.what() << std::endl;
+    std::cout << "Zeleriusd already running - " << ex.what() << std::endl;
 	return api::BYTECOIND_ALREADY_RUNNING;
 } catch (const std::exception &ex) {  // On Windows what() is not printed if thrown from main
 	std::cout << "Exception in main() - " << ex.what() << std::endl;
